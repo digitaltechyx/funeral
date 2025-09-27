@@ -53,7 +53,6 @@ export async function chargeSelectedMembers(
         currency: 'usd',
         customer: member.stripeCustomerId,
         payment_method: member.stripePaymentMethodId,
-        confirmation_method: 'manual',
         confirm: true,
         automatic_payment_methods: {
           enabled: true,
