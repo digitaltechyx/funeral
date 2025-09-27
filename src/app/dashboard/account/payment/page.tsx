@@ -11,7 +11,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CreditCard, CheckCircle, AlertCircle } from 'lucide-react';
+import { Loader2, CreditCard, CheckCircle, AlertCircle, Edit, Trash2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { updateUserPaymentMethodStatus } from '@/lib/user-actions';
@@ -26,6 +26,8 @@ function PaymentMethodForm() {
   
   const [loading, setLoading] = useState(false);
   const [hasPaymentMethod, setHasPaymentMethod] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [showUpdateForm, setShowUpdateForm] = useState(false);
 
   useEffect(() => {
     if (userProfile?.hasPaymentMethod) {
@@ -40,7 +42,8 @@ function PaymentMethodForm() {
       return;
     }
 
-    setLoading(true);
+    const isLoading = isUpdating ? setIsUpdating : setLoading;
+    isLoading(true);
 
     try {
       // Create setup intent
@@ -85,18 +88,22 @@ function PaymentMethodForm() {
           await refreshUserProfile();
           
           toast({
-            title: "Payment Method Added",
-            description: "Your payment method has been successfully added.",
+            title: isUpdating ? "Payment Method Updated" : "Payment Method Added",
+            description: isUpdating 
+              ? "Your payment method has been successfully updated." 
+              : "Your payment method has been successfully added.",
           });
           setHasPaymentMethod(true);
+          setShowUpdateForm(false);
         } else {
           console.log('Status update failed:', updateResult.error);
           toast({
             variant: "destructive",
-            title: "Payment Method Added",
-            description: "Payment method added but status update failed. Please refresh the page.",
+            title: isUpdating ? "Payment Method Updated" : "Payment Method Added",
+            description: "Payment method updated but status update failed. Please refresh the page.",
           });
           setHasPaymentMethod(true);
+          setShowUpdateForm(false);
         }
       }
     } catch (err) {
@@ -107,29 +114,80 @@ function PaymentMethodForm() {
         description: err instanceof Error ? err.message : 'Failed to add payment method',
       });
     } finally {
-      setLoading(false);
+      isLoading(false);
     }
   };
 
-  if (hasPaymentMethod) {
+  const handleRemovePaymentMethod = async () => {
+    if (!user) return;
+
+    try {
+      const updateResult = await updateUserPaymentMethodStatus(user.uid, false);
+      
+      if (updateResult.success) {
+        await refreshUserProfile();
+        toast({
+          title: "Payment Method Removed",
+          description: "Your payment method has been successfully removed.",
+        });
+        setHasPaymentMethod(false);
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to remove payment method. Please try again.",
+        });
+      }
+    } catch (err) {
+      console.error('Error removing payment method:', err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to remove payment method. Please try again.",
+      });
+    }
+  };
+
+  if (hasPaymentMethod && !showUpdateForm) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 text-green-600" />
-            Payment Method Added
+            Payment Method Active
           </CardTitle>
           <CardDescription>
             Your payment method is set up and ready for community contributions.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <Alert>
-            <CheckCircle className="h-4 w-4" />
-          <AlertDescription>
-            Your card will be automatically charged when the community needs to contribute to memorial expenses.
-          </AlertDescription>
-          </Alert>
+          <div className="space-y-4">
+            <Alert>
+              <CheckCircle className="h-4 w-4" />
+              <AlertDescription>
+                Your card will be automatically charged when the community needs to contribute to memorial expenses.
+              </AlertDescription>
+            </Alert>
+            
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                onClick={() => setShowUpdateForm(true)}
+                className="flex items-center gap-2"
+              >
+                <Edit className="h-4 w-4" />
+                Change Card
+              </Button>
+              <Button 
+                variant="destructive" 
+                onClick={handleRemovePaymentMethod}
+                className="flex items-center gap-2"
+              >
+                <Trash2 className="h-4 w-4" />
+                Remove Card
+              </Button>
+            </div>
+          </div>
         </CardContent>
       </Card>
     );
@@ -140,21 +198,36 @@ function PaymentMethodForm() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <CreditCard className="h-5 w-5" />
-          Add Payment Method
+          {isUpdating ? 'Update Payment Method' : 'Add Payment Method'}
         </CardTitle>
         <CardDescription>
-          Add a payment method to participate in community memorial contributions.
+          {isUpdating 
+            ? 'Update your payment method for community memorial contributions.'
+            : 'Add a payment method to participate in community memorial contributions.'
+          }
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          <Alert>
-            <AlertCircle className="h-4 w-4" />
-            <AlertDescription>
-              You need to add a payment method to participate in community contributions.
-              When a memorial claim is approved, all active members will be charged $8 per person (including dependents).
-            </AlertDescription>
-          </Alert>
+          {!isUpdating && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                You need to add a payment method to participate in community contributions.
+                When a memorial claim is approved, all active members will be charged $8 per person (including dependents).
+              </AlertDescription>
+            </Alert>
+          )}
+          
+          {isUpdating && (
+            <Alert>
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                Enter your new payment method details below. This will replace your current payment method.
+              </AlertDescription>
+            </Alert>
+          )}
+          
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="p-4 border rounded-md">
               <CardElement
@@ -171,20 +244,34 @@ function PaymentMethodForm() {
                 }}
               />
             </div>
-            <Button 
-              type="submit" 
-              disabled={!stripe || loading} 
-              className="w-full"
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Adding Payment Method...
-                </>
-              ) : (
-                'Add Payment Method'
+            
+            <div className="flex gap-2">
+              <Button 
+                type="submit" 
+                disabled={!stripe || loading || isUpdating} 
+                className="flex-1"
+              >
+                {(loading || isUpdating) ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    {isUpdating ? 'Updating...' : 'Adding...'}
+                  </>
+                ) : (
+                  isUpdating ? 'Update Payment Method' : 'Add Payment Method'
+                )}
+              </Button>
+              
+              {isUpdating && (
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => setShowUpdateForm(false)}
+                  disabled={loading || isUpdating}
+                >
+                  Cancel
+                </Button>
               )}
-            </Button>
+            </div>
           </form>
         </div>
       </CardContent>
