@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Load user profile from Firestore
   const loadUserProfile = async (user: User) => {
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(db, 'members', user.uid));
       if (userDoc.exists()) {
         const profileData = userDoc.data();
         setUserProfile({
@@ -85,7 +85,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           hasPaymentMethod: false,
         };
         
-        await setDoc(doc(db, 'users', user.uid), {
+        await setDoc(doc(db, 'members', user.uid), {
           ...defaultProfile,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -222,7 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const updatedProfile = { ...userProfile, ...updates };
-      await setDoc(doc(db, 'users', user.uid), {
+      await setDoc(doc(db, 'members', user.uid), {
         ...updatedProfile,
         updatedAt: serverTimestamp(),
       }, { merge: true });
@@ -239,7 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     
     try {
-      const userDoc = await getDoc(doc(db, 'users', user.uid));
+      const userDoc = await getDoc(doc(db, 'members', user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setUserProfile({

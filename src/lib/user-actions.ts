@@ -6,6 +6,16 @@ import { revalidatePath } from 'next/cache';
 
 export async function updateUserPaymentMethodStatus(userId: string, hasPaymentMethod: boolean) {
   try {
+    // Update in the MEMBERS collection (this is what the dashboard uses)
+    const memberRef = doc(db, 'members', userId);
+    
+    await updateDoc(memberRef, {
+      hasPaymentMethod,
+      status: hasPaymentMethod ? 'Active' : 'Inactive',
+      updatedAt: new Date()
+    });
+
+    // Also update in the USERS collection for consistency
     const userRef = doc(db, 'users', userId);
     
     await updateDoc(userRef, {
