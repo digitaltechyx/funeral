@@ -31,6 +31,7 @@ export interface UserProfile {
   walletBalance: number;
   joinDate: Timestamp;
   emergencyContacts?: EmergencyContact[];
+  hasPaymentMethod?: boolean;
 }
 
 interface AuthContextType {
@@ -54,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Load user profile from Firestore
   const loadUserProfile = async (user: User) => {
     try {
-      const userDoc = await getDoc(doc(db, 'members', user.uid));
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (userDoc.exists()) {
         const profileData = userDoc.data();
         setUserProfile({
@@ -67,6 +68,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           walletBalance: profileData.walletBalance || 0,
           joinDate: profileData.joinDate || new Date().toISOString(),
           emergencyContacts: profileData.emergencyContacts || [],
+          hasPaymentMethod: profileData.hasPaymentMethod || false,
         });
       } else {
         // User doesn't have a profile yet, create one
@@ -80,9 +82,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           walletBalance: 0,
           joinDate: new Date().toISOString(),
           emergencyContacts: [],
+          hasPaymentMethod: false,
         };
         
-        await setDoc(doc(db, 'members', user.uid), {
+        await setDoc(doc(db, 'users', user.uid), {
           ...defaultProfile,
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -219,7 +222,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     
     try {
       const updatedProfile = { ...userProfile, ...updates };
-      await setDoc(doc(db, 'members', user.uid), {
+      await setDoc(doc(db, 'users', user.uid), {
         ...updatedProfile,
         updatedAt: serverTimestamp(),
       }, { merge: true });
@@ -236,7 +239,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!user) return;
     
     try {
-      const userDoc = await getDoc(doc(db, 'members', user.uid));
+      const userDoc = await getDoc(doc(db, 'users', user.uid));
       if (userDoc.exists()) {
         const userData = userDoc.data();
         setUserProfile({
@@ -249,6 +252,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           walletBalance: userData.walletBalance,
           joinDate: userData.joinDate,
           emergencyContacts: userData.emergencyContacts || [],
+          hasPaymentMethod: userData.hasPaymentMethod || false,
         });
       }
     } catch (error) {

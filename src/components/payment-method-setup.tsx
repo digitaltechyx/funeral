@@ -9,6 +9,7 @@ import { Loader2, CreditCard, CheckCircle, XCircle, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { updateUserPaymentMethodStatus } from '@/lib/user-actions';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
@@ -17,7 +18,7 @@ interface PaymentMethodSetupProps {
 }
 
 function PaymentMethodForm({ onSuccess }: PaymentMethodSetupProps) {
-  const { user } = useAuth();
+  const { user, refreshUserProfile } = useAuth();
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -66,11 +67,26 @@ function PaymentMethodForm({ onSuccess }: PaymentMethodSetupProps) {
       if (confirmError) {
         setError(confirmError.message || 'Failed to add payment method');
       } else {
-        toast({
-          title: "Payment Method Added",
-          description: "Your payment method has been successfully added.",
-        });
-        onSuccess?.();
+        // Update user's payment method status in Firestore
+        const updateResult = await updateUserPaymentMethodStatus(user.uid, true);
+        
+        if (updateResult.success) {
+          // Refresh user profile to get updated payment method status
+          await refreshUserProfile();
+          
+          toast({
+            title: "Payment Method Added",
+            description: "Your payment method has been successfully added.",
+          });
+          onSuccess?.();
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Payment Method Added",
+            description: "Payment method added but status update failed. Please refresh the page.",
+          });
+          onSuccess?.();
+        }
       }
     } catch (err) {
       console.error('Error adding payment method:', err);
@@ -137,6 +153,11 @@ export function PaymentMethodSetup({ onSuccess }: PaymentMethodSetupProps) {
     }
   }, [userProfile]);
 
+  const handleSuccess = () => {
+    setHasPaymentMethod(true);
+    onSuccess?.();
+  };
+
   if (loading) {
     return (
       <Card>
@@ -184,10 +205,7 @@ export function PaymentMethodSetup({ onSuccess }: PaymentMethodSetupProps) {
       </CardHeader>
       <CardContent>
         <Elements stripe={stripePromise}>
-          <PaymentMethodForm onSuccess={() => {
-            setHasPaymentMethod(true);
-            onSuccess?.();
-          }} />
+          <PaymentMethodForm onSuccess={handleSuccess} />
         </Elements>
       </CardContent>
     </Card>
