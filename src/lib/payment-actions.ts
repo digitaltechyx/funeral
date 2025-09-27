@@ -147,15 +147,30 @@ export async function chargeSelectedMembers(
 
 export async function getMemberPaymentHistory(memberId: string) {
   try {
-    const memberRef = doc(db, COLLECTIONS.MEMBERS, memberId);
-    const memberDoc = await getDoc(memberRef);
+    const paymentsRef = collection(db, COLLECTIONS.PAYMENTS);
+    const q = query(
+      paymentsRef, 
+      where('memberId', '==', memberId),
+      orderBy('chargedAt', 'desc')
+    );
+    const paymentsSnapshot = await getDocs(q);
     
-    if (memberDoc.exists()) {
-      const memberData = memberDoc.data();
-      return memberData.paymentHistory || [];
-    }
+    const payments = paymentsSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        amount: data.amount || 0,
+        shares: data.shares || 1,
+        amountPerShare: data.amountPerShare || 0,
+        date: data.chargedAt?.toDate?.()?.toISOString() || new Date().toISOString(),
+        type: data.type || 'memorial_share',
+        status: data.status || 'pending',
+        paymentIntentId: data.paymentIntentId || '',
+        error: data.error || undefined,
+      };
+    });
     
-    return [];
+    return payments;
   } catch (error) {
     console.error('Error fetching payment history:', error);
     return [];
