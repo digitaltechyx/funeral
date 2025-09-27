@@ -5,10 +5,24 @@ import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getServerStripe } from '@/lib/stripe-server';
 
 export async function POST(request: NextRequest) {
+  let userId, memberId, actualUserId;
+  
   try {
+    console.log('Starting setup intent creation...');
     const stripe = getServerStripe();
-    const { userId, memberId } = await request.json();
-    const actualUserId = userId || memberId;
+    console.log('Stripe instance created successfully');
+    
+    let requestData;
+    try {
+      requestData = await request.json();
+    } catch (jsonError) {
+      console.error('JSON parsing error:', jsonError);
+      return NextResponse.json({ error: 'Invalid JSON in request body' }, { status: 400 });
+    }
+    
+    userId = requestData.userId;
+    memberId = requestData.memberId;
+    actualUserId = userId || memberId;
 
     if (!actualUserId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
