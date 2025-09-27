@@ -83,7 +83,9 @@ export async function chargeSelectedMembers(
         error: paymentIntent.status !== 'succeeded' ? `Payment failed: ${paymentIntent.status}` : undefined,
       };
 
-      await addDoc(collection(db, COLLECTIONS.PAYMENTS), paymentRecord);
+      console.log('Creating payment record:', paymentRecord);
+      const paymentDocRef = await addDoc(collection(db, COLLECTIONS.PAYMENTS), paymentRecord);
+      console.log('Payment record created with ID:', paymentDocRef.id);
 
       // Update member's payment history
       const memberRef = doc(db, COLLECTIONS.MEMBERS, member.id);
@@ -154,7 +156,9 @@ export async function chargeSelectedMembers(
           error: errorMessage,
         };
 
-        await addDoc(collection(db, COLLECTIONS.PAYMENTS), paymentRecord);
+        console.log('Creating failed payment record:', paymentRecord);
+        const paymentDocRef = await addDoc(collection(db, COLLECTIONS.PAYMENTS), paymentRecord);
+        console.log('Failed payment record created with ID:', paymentDocRef.id);
 
         // Update member's payment history
         const memberRef = doc(db, COLLECTIONS.MEMBERS, member.id);
@@ -204,6 +208,8 @@ export async function chargeSelectedMembers(
 
 export async function getMemberPaymentHistory(memberId: string) {
   try {
+    console.log('Fetching payment history for member:', memberId);
+    
     const paymentsRef = collection(db, COLLECTIONS.PAYMENTS);
     const q = query(
       paymentsRef, 
@@ -211,6 +217,18 @@ export async function getMemberPaymentHistory(memberId: string) {
       orderBy('chargedAt', 'desc')
     );
     const paymentsSnapshot = await getDocs(q);
+    
+    console.log('Payment history query result:', {
+      memberId,
+      totalDocs: paymentsSnapshot.docs.length,
+      docs: paymentsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        memberId: doc.data().memberId,
+        status: doc.data().status,
+        amount: doc.data().amount,
+        error: doc.data().error
+      }))
+    });
     
     const payments = paymentsSnapshot.docs.map(doc => {
       const data = doc.data();
@@ -227,6 +245,7 @@ export async function getMemberPaymentHistory(memberId: string) {
       };
     });
     
+    console.log('Processed payments:', payments);
     return payments;
   } catch (error) {
     console.error('Error fetching payment history:', error);
