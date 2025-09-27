@@ -55,6 +55,10 @@ export async function chargeSelectedMembers(
         payment_method: member.stripePaymentMethodId,
         confirmation_method: 'manual',
         confirm: true,
+        automatic_payment_methods: {
+          enabled: true,
+          allow_redirects: 'never'
+        },
         metadata: {
           memberId: member.id,
           type: 'memorial_share',
