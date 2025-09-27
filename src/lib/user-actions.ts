@@ -4,7 +4,7 @@ import { db } from '@/lib/firebase';
 import { doc, updateDoc, getDoc, setDoc } from 'firebase/firestore';
 import { revalidatePath } from 'next/cache';
 
-export async function updateUserPaymentMethodStatus(userId: string, hasPaymentMethod: boolean) {
+export async function updateUserPaymentMethodStatus(userId: string, hasPaymentMethod: boolean, stripeCustomerId?: string, stripePaymentMethodId?: string) {
   try {
     console.log('Updating payment method status for user:', userId, 'hasPaymentMethod:', hasPaymentMethod);
     
@@ -25,7 +25,8 @@ export async function updateUserPaymentMethodStatus(userId: string, hasPaymentMe
         walletBalance: 0,
         sadqaWallet: 0,
         role: 'member',
-        stripeCustomerId: null,
+        stripeCustomerId: stripeCustomerId || null,
+        stripePaymentMethodId: stripePaymentMethodId || null,
         hasPaymentMethod,
         emergencyContacts: [],
         createdAt: new Date(),
@@ -35,11 +36,21 @@ export async function updateUserPaymentMethodStatus(userId: string, hasPaymentMe
     } else {
       console.log('User exists in MEMBERS collection, updating...');
       // Update existing user
-      await updateDoc(memberRef, {
+      const updateData: any = {
         hasPaymentMethod,
         status: hasPaymentMethod ? 'Active' : 'Inactive',
         updatedAt: new Date()
-      });
+      };
+      
+      // Only update Stripe fields if they're provided
+      if (stripeCustomerId) {
+        updateData.stripeCustomerId = stripeCustomerId;
+      }
+      if (stripePaymentMethodId) {
+        updateData.stripePaymentMethodId = stripePaymentMethodId;
+      }
+      
+      await updateDoc(memberRef, updateData);
       console.log('Updated user in MEMBERS collection');
     }
 
@@ -48,10 +59,20 @@ export async function updateUserPaymentMethodStatus(userId: string, hasPaymentMe
     const userDoc = await getDoc(userRef);
     
     if (userDoc.exists()) {
-      await updateDoc(userRef, {
+      const updateData: any = {
         hasPaymentMethod,
         updatedAt: new Date()
-      });
+      };
+      
+      // Only update Stripe fields if they're provided
+      if (stripeCustomerId) {
+        updateData.stripeCustomerId = stripeCustomerId;
+      }
+      if (stripePaymentMethodId) {
+        updateData.stripePaymentMethodId = stripePaymentMethodId;
+      }
+      
+      await updateDoc(userRef, updateData);
       console.log('Updated user in USERS collection');
     }
 

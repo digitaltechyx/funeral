@@ -74,7 +74,8 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true,
-      clientSecret: setupIntent.client_secret 
+      clientSecret: setupIntent.client_secret,
+      customerId: customerId
     });
 
   } catch (error) {

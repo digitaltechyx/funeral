@@ -57,14 +57,14 @@ function PaymentMethodForm() {
         }),
       });
 
-      const { clientSecret } = await response.json();
+      const { clientSecret, customerId: apiCustomerId } = await response.json();
 
       if (!clientSecret) {
         throw new Error('Failed to create setup intent');
       }
 
       // Confirm setup intent
-      const { error: confirmError } = await stripe.confirmCardSetup(clientSecret, {
+      const { error: confirmError, setupIntent } = await stripe.confirmCardSetup(clientSecret, {
         payment_method: {
           card: elements.getElement(CardElement)!,
           billing_details: {
@@ -78,8 +78,22 @@ function PaymentMethodForm() {
         throw new Error(confirmError.message || 'Failed to add payment method');
       } else {
         console.log('Stripe setup succeeded, updating user payment method status...');
-        // Update user's payment method status in Firestore
-        const updateResult = await updateUserPaymentMethodStatus(user.uid, true);
+        console.log('Setup intent:', setupIntent);
+        
+        // Get the customer ID and payment method ID from the setup intent
+        const stripeCustomerId = setupIntent?.customer as string || apiCustomerId;
+        const stripePaymentMethodId = setupIntent?.payment_method as string;
+        
+        console.log('Stripe Customer ID:', stripeCustomerId);
+        console.log('Stripe Payment Method ID:', stripePaymentMethodId);
+        
+        // Update user's payment method status in Firestore with Stripe IDs
+        const updateResult = await updateUserPaymentMethodStatus(
+          user.uid, 
+          true, 
+          stripeCustomerId, 
+          stripePaymentMethodId
+        );
         console.log('Update result:', updateResult);
         
         if (updateResult.success) {
