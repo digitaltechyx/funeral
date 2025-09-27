@@ -18,6 +18,8 @@ import { updateUserPaymentMethodStatus } from '@/lib/user-actions';
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
+console.log('Stripe publishable key:', process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY ? 'Set' : 'Not set');
+
 function PaymentMethodForm() {
   const stripe = useStripe();
   const elements = useElements();
@@ -38,7 +40,14 @@ function PaymentMethodForm() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
 
+    console.log('Submit started, checking dependencies...');
+    console.log('Stripe:', !!stripe);
+    console.log('Elements:', !!elements);
+    console.log('User:', !!user);
+    console.log('User UID:', user?.uid);
+
     if (!stripe || !elements || !user) {
+      console.log('Missing dependencies, aborting');
       return;
     }
 
@@ -57,7 +66,16 @@ function PaymentMethodForm() {
         }),
       });
 
-      const { clientSecret, customerId: apiCustomerId } = await response.json();
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Setup intent API error:', response.status, errorText);
+        throw new Error(`Failed to create setup intent: ${response.status} ${errorText}`);
+      }
+
+      const responseData = await response.json();
+      console.log('Setup intent response:', responseData);
+      
+      const { clientSecret, customerId: apiCustomerId } = responseData;
 
       if (!clientSecret) {
         throw new Error('Failed to create setup intent');
