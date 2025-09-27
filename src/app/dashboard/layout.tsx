@@ -48,7 +48,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
               <SidebarMenuButton asChild>
                 <Link href="/dashboard/payment-history">
                   <Landmark />
-                  Payment History
+                  Share History
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

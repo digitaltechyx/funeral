@@ -131,7 +131,7 @@ export const claims: Claim[] = [
 
 // Let's populate payment history based on the 'Paid' claim
 const activeMembersCount = members.filter(m => m.status === 'Active').length;
-const shareAmount = 8000 / activeMembersCount;
+const shareAmount = 8; // Fixed $8 per member
 
 members.forEach(member => {
     if (member.status === 'Active') {
@@ -177,7 +177,7 @@ export const getDashboardData = () => {
     const totalMembers = members.length;
     const activeMembers = members.filter(m => m.status === 'Active').length;
     const totalFunerals = claims.filter(c => c.status === 'Paid').length;
-    const eachShareAmount = activeMembers > 0 ? 8000 / activeMembers : 0;
+    const eachShareAmount = 8; // Fixed $8 per member
     
     // Assuming we're looking at the first member's data
     const currentUser = members[0];

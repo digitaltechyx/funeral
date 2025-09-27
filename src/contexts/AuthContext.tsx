@@ -9,7 +9,7 @@ import {
   onAuthStateChanged,
   updateProfile
 } from 'firebase/auth';
-import { doc, setDoc, getDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { auth, db } from '@/lib/firebase';
 
 export interface EmergencyContact {
@@ -29,8 +29,7 @@ export interface UserProfile {
   role: 'member' | 'admin' | 'super_admin';
   status: 'Active' | 'Inactive';
   walletBalance: number;
-  joinDate: string;
-  stripeCustomerId?: string;
+  joinDate: Timestamp;
   emergencyContacts?: EmergencyContact[];
 }
 
@@ -42,6 +41,7 @@ interface AuthContextType {
   signUp: (email: string, password: string, name: string, phone: string, role: 'member' | 'admin' | 'super_admin') => Promise<void>;
   logout: () => Promise<void>;
   updateUserProfile: (updates: Partial<UserProfile>) => Promise<void>;
+  refreshUserProfile: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -66,7 +66,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           status: profileData.status || 'Active',
           walletBalance: profileData.walletBalance || 0,
           joinDate: profileData.joinDate || new Date().toISOString(),
-          stripeCustomerId: profileData.stripeCustomerId,
+          emergencyContacts: profileData.emergencyContacts || [],
         });
       } else {
         // User doesn't have a profile yet, create one
@@ -79,6 +79,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           status: 'Active',
           walletBalance: 0,
           joinDate: new Date().toISOString(),
+          emergencyContacts: [],
         };
         
         await setDoc(doc(db, 'members', user.uid), {
@@ -111,14 +112,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           role: 'super_admin',
           status: 'Active',
           walletBalance: 0,
-          joinDate: new Date().toISOString(),
+          joinDate: serverTimestamp(),
         };
 
         // Update members collection
         await setDoc(doc(db, 'members', userCredential.user.uid), {
           ...superAdminProfile,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
 
         // Update admin_users collection
@@ -135,8 +136,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             'remove_admins',
             'manage_system'
           ],
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
       }
       
@@ -155,7 +156,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     password: string, 
     name: string, 
     phone: string, 
-    role: 'member' | 'admin' = 'member'
+    role: 'member' | 'admin' = 'member',
+    emergencyContacts?: EmergencyContact[]
   ) => {
     try {
       setLoading(true);
@@ -166,6 +168,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Update display name
       await updateProfile(userCredential.user, { displayName: name });
       
+      // No need to create Stripe customer during registration
+      // Payment methods will be handled separately when user adds them
+      
       // Create user profile in Firestore (only members can register)
       const userProfile: UserProfile = {
         uid: userCredential.user.uid,
@@ -173,15 +178,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         name: name,
         phone: phone,
         role: 'member', // Always member for new registrations
-        status: 'Active',
+        status: 'Inactive', // Start as inactive until payment method is added
         walletBalance: 0,
-        joinDate: new Date().toISOString(),
+        joinDate: serverTimestamp(),
+        emergencyContacts: emergencyContacts || [],
       };
 
       await setDoc(doc(db, 'members', userCredential.user.uid), {
         ...userProfile,
-        createdAt: new Date(),
-        updatedAt: new Date(),
+        hasPaymentMethod: false,
+        sadqaWallet: 0,
+        createdAt: serverTimestamp(),
+        updatedAt: serverTimestamp(),
       });
 
       setUserProfile(userProfile);
@@ -213,13 +221,38 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const updatedProfile = { ...userProfile, ...updates };
       await setDoc(doc(db, 'members', user.uid), {
         ...updatedProfile,
-        updatedAt: new Date(),
+        updatedAt: serverTimestamp(),
       }, { merge: true });
       
       setUserProfile(updatedProfile);
     } catch (error) {
       console.error('Update profile error:', error);
       throw error;
+    }
+  };
+
+  // Refresh user profile from Firestore
+  const refreshUserProfile = async () => {
+    if (!user) return;
+    
+    try {
+      const userDoc = await getDoc(doc(db, 'members', user.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        setUserProfile({
+          uid: user.uid,
+          email: userData.email,
+          name: userData.name,
+          phone: userData.phone,
+          role: userData.role,
+          status: userData.status,
+          walletBalance: userData.walletBalance,
+          joinDate: userData.joinDate,
+          emergencyContacts: userData.emergencyContacts || [],
+        });
+      }
+    } catch (error) {
+      console.error('Error refreshing user profile:', error);
     }
   };
 
@@ -247,6 +280,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     logout,
     updateUserProfile,
+    refreshUserProfile,
   };
 
   return (

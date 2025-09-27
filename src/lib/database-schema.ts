@@ -11,6 +11,7 @@ export const COLLECTIONS = {
   WALLET_POOL: 'wallet_pool',
   SADQA_TRANSACTIONS: 'sadqa_transactions',
   TRANSPARENCY_REPORTS: 'transparency_reports',
+  SYSTEM_STATS: 'system_stats',
 } as const;
 
 // Member document structure
@@ -56,11 +57,24 @@ export interface Claim {
   id: string;
   memberId: string;
   memberName: string;
+  memberEmail: string;
   deceasedName: string;
+  address: string;
+  city: string;
+  zipCode: string;
+  state: string;
+  country: string;
+  relationship: string;
   dateOfDeath: Timestamp;
   status: 'Pending' | 'Approved' | 'Paid' | 'Rejected';
   submissionDate: Timestamp;
   funeralDate: Timestamp;
+  notes?: string;
+  // Death certificate file info
+  deathCertificateFileName: string;
+  deathCertificateFileSize: number;
+  deathCertificateFileType: string;
+  deathCertificateURL: string;
   documents: string[]; // Array of file URLs
   rejectionReason?: string;
   approvedBy?: string; // Admin user ID
@@ -73,13 +87,15 @@ export interface Claim {
 export interface Payment {
   id: string;
   memberId: string;
-  claimId: string;
-  deceasedName: string;
-  amountDeducted: number;
-  remainingBalance: number;
-  paymentDate: Timestamp;
-  stripePaymentIntentId?: string;
+  memberName: string;
+  memberEmail: string;
+  amount: number;
+  shares: number;
+  amountPerShare: number;
+  paymentIntentId: string;
   status: 'pending' | 'completed' | 'failed';
+  type: 'funeral_share' | 'sadqa_donation' | 'other';
+  chargedAt: Timestamp;
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -134,20 +150,35 @@ export interface SadqaTransaction {
   updatedAt: Timestamp;
 }
 
+// System statistics document structure
+export interface SystemStats {
+  id: string;
+  totalFunerals: number;
+  lastUpdatedBy: string; // Admin ID
+  lastUpdateReason: string;
+  lastUpdatedBy: string; // Admin name
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
 // Transparency report document structure
 export interface TransparencyReport {
   id: string;
-  funeralId: string;
-  deceasedName: string;
-  funeralDate: Timestamp;
-  totalAmount: number;
-  individualShare: number;
-  activeMembersCount: number;
-  billUrl?: string; // Uploaded funeral bill
-  description: string;
-  createdBy: string; // Admin ID
+  title: string;
+  message: string;
+  funeralId?: string; // Optional, links to a specific funeral/claim
+  expenses: {
+    id: string;
+    description: string;
+    amount: number;
+    category: 'Service' | 'Product' | 'Transportation' | 'Other';
+  }[];
+  totalExpenses: number;
+  billImageUrls: string[]; // URLs to uploaded bill images/PDFs
   createdAt: Timestamp;
   updatedAt: Timestamp;
+  createdBy: string; // Admin user ID
+  status: 'Draft' | 'Published';
 }
 
 // Database indexes (for Firestore queries)

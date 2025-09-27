@@ -3,7 +3,7 @@
 import { Header } from "@/components/app/header";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import { BarChart3, Handshake, Landmark, LayoutDashboard, ListFilter, Phone, Settings, ShieldCheck, Users, UserPlus, Users2, UserCog } from "lucide-react";
+import { BarChart3, Handshake, Landmark, LayoutDashboard, Phone, ShieldCheck, Users, UserPlus, Users2, UserCog, FileText } from "lucide-react";
 import Link from "next/link";
 import { ReactNode } from "react";
 import { useAuth } from "@/contexts/AuthContext";
@@ -90,9 +90,9 @@ function AdminSidebar() {
           </SidebarMenuItem>
           <SidebarMenuItem>
             <SidebarMenuButton asChild>
-              <Link href="/admin/funerals">
-                <ListFilter />
-                Funerals
+              <Link href="/admin/transparency-reports">
+                <FileText />
+                Transparency Reports
               </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -115,16 +115,7 @@ function AdminSidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-2">
-         <SidebarMenu>
-           <SidebarMenuItem>
-            <SidebarMenuButton asChild>
-              <Link href="/admin/settings">
-                <Settings />
-                Settings
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-         </SidebarMenu>
+         {/* Footer content can be added here if needed */}
       </SidebarFooter>
     </Sidebar>
   );

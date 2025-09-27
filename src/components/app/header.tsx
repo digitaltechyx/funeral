@@ -6,9 +6,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 type HeaderProps = {
     title: string;
+    children?: React.ReactNode;
 }
 
-export function Header({ title }: HeaderProps) {
+export function Header({ title, children }: HeaderProps) {
   const { userProfile } = useAuth();
   
   return (
@@ -18,6 +19,7 @@ export function Header({ title }: HeaderProps) {
        </div>
       <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">{title}</h1>
       <div className="flex items-center gap-4">
+        {children}
         {userProfile && (
           <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
             <span>Welcome, {userProfile.name}</span>

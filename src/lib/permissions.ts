@@ -30,6 +30,7 @@ export const PERMISSIONS = {
   MANAGE_SYSTEM: 'manage_system',
   VIEW_AUDIT_LOGS: 'view_audit_logs',
   SYSTEM_SETTINGS: 'system_settings',
+  MANAGE_WALLET_POOL: 'manage_wallet_pool',
 } as const;
 
 export const PERMISSION_DEFINITIONS: Record<string, Permission> = {
@@ -123,6 +124,11 @@ export const PERMISSION_DEFINITIONS: Record<string, Permission> = {
     description: 'Modify system settings',
     requiredRole: 'super_admin'
   },
+  [PERMISSIONS.MANAGE_WALLET_POOL]: {
+    name: 'Manage Wallet Pool',
+    description: 'Update wallet pool balance',
+    requiredRole: 'super_admin'
+  },
 };
 
 export function hasPermission(userProfile: UserProfile | null, permission: string): boolean {
@@ -162,4 +168,8 @@ export function canCreateAdmins(userProfile: UserProfile | null): boolean {
 
 export function canRemoveAdmins(userProfile: UserProfile | null): boolean {
   return hasPermission(userProfile, PERMISSIONS.REMOVE_ADMINS);
+}
+
+export function canManageWalletPool(userProfile: UserProfile | null): boolean {
+  return hasPermission(userProfile, PERMISSIONS.MANAGE_WALLET_POOL);
 }

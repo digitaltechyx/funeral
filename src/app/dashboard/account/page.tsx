@@ -15,7 +15,6 @@ import {
   Phone, 
   Calendar, 
   CreditCard, 
-  Shield, 
   Edit3, 
   Save, 
   X,
@@ -25,6 +24,7 @@ import {
   CheckCircle
 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+import Link from "next/link";
 
 export default function AccountPage() {
   const { user, userProfile } = useAuth();
@@ -96,7 +96,6 @@ export default function AccountPage() {
           <TabsList>
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="payment">Payment Methods</TabsTrigger>
-            <TabsTrigger value="security">Security</TabsTrigger>
           </TabsList>
 
           {/* Profile Tab */}
@@ -198,7 +197,7 @@ export default function AccountPage() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
+                  <User className="h-5 w-5" />
                   Account Status
                 </CardTitle>
               </CardHeader>
@@ -231,32 +230,25 @@ export default function AccountPage() {
           <TabsContent value="payment" className="space-y-4">
             <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="flex items-center gap-2">
-                      <CreditCard className="h-5 w-5" />
-                      Payment Methods
-                    </CardTitle>
-                    <CardDescription>
-                      Manage your payment methods to become an active member
-                    </CardDescription>
-                  </div>
-                  <Button size="sm">
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Payment Method
-                  </Button>
-                </div>
+                <CardTitle className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5" />
+                  Payment Methods
+                </CardTitle>
+                <CardDescription>
+                  Manage your payment methods for community contributions
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <CreditCard className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold mb-2">No Payment Methods</h3>
-                  <p className="text-muted-foreground mb-4">
-                    Add a payment method to become an active member and participate in the community.
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    Add a payment method to participate in community funeral contributions.
+                    When a funeral claim is approved, all active members will be charged $8 per person (including dependents).
                   </p>
-                  <Button>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Add Your First Payment Method
+                  <Button asChild className="w-full">
+                    <Link href="/dashboard/account/payment">
+                      <CreditCard className="mr-2 h-4 w-4" />
+                      Manage Payment Methods
+                    </Link>
                   </Button>
                 </div>
               </CardContent>
@@ -304,47 +296,6 @@ export default function AccountPage() {
             </Card>
           </TabsContent>
 
-          {/* Security Tab */}
-          <TabsContent value="security" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Shield className="h-5 w-5" />
-                  Security Settings
-                </CardTitle>
-                <CardDescription>
-                  Manage your account security and privacy settings
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Change Password</p>
-                      <p className="text-sm text-muted-foreground">
-                        Update your account password
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Change Password
-                    </Button>
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="font-medium">Two-Factor Authentication</p>
-                      <p className="text-sm text-muted-foreground">
-                        Add an extra layer of security to your account
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">
-                      Enable 2FA
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </div>

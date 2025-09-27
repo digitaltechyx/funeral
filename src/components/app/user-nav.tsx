@@ -73,7 +73,7 @@ export function UserNav() {
           <DropdownMenuItem asChild>
             <Link href="/dashboard/payment-history">
               <CreditCard className="mr-2 h-4 w-4" />
-              <span>Payment History</span>
+              <span>Share History</span>
             </Link>
           </DropdownMenuItem>
           <DropdownMenuItem asChild>

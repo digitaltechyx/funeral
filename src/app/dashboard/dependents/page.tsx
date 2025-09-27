@@ -1,3 +1,6 @@
+"use client";
+
+import { useState, useEffect } from "react";
 import { Header } from "@/components/app/header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,11 +8,111 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { members } from "@/lib/data";
-import { PlusCircle, AlertTriangle } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
+import { getUserDependents } from "@/lib/firestore-service";
+import { addDependentAction, deleteDependentAction } from "@/lib/dependent-actions";
+import { PlusCircle, AlertTriangle, Loader2, Trash2 } from "lucide-react";
 
 export default function UserDependentsPage() {
-  const userDependents = members[0].dependents;
+  const { user } = useAuth();
+  const [dependents, setDependents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [addingDependent, setAddingDependent] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  // Fetch user's dependents
+  useEffect(() => {
+    const fetchDependents = async () => {
+      if (!user?.uid) return;
+      
+      try {
+        setLoading(true);
+        const userDependents = await getUserDependents(user.uid);
+        setDependents(userDependents);
+      } catch (error) {
+        console.error('Error fetching dependents:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDependents();
+  }, [user?.uid]);
+
+  const handleAddDependent = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!user?.uid) return;
+    
+    const formData = new FormData(event.currentTarget);
+    
+    try {
+      setAddingDependent(true);
+      const result = await addDependentAction(user.uid, formData);
+      
+      if (result.success) {
+        // Refresh dependents list
+        const userDependents = await getUserDependents(user.uid);
+        setDependents(userDependents);
+        // Reset form and close dialog
+        if (event.currentTarget) {
+          event.currentTarget.reset();
+        }
+        setDialogOpen(false);
+      } else {
+        alert(result.error || 'Failed to add dependent');
+      }
+    } catch (error) {
+      console.error('Error adding dependent:', error);
+      alert('Failed to add dependent');
+    } finally {
+      setAddingDependent(false);
+    }
+  };
+
+  const handleDeleteDependent = async (dependentId: string) => {
+    if (!confirm('Are you sure you want to delete this dependent?')) return;
+    
+    try {
+      setDeletingId(dependentId);
+      const result = await deleteDependentAction(dependentId);
+      
+      if (result.success) {
+        // Refresh dependents list
+        const userDependents = await getUserDependents(user!.uid);
+        setDependents(userDependents);
+      } else {
+        alert(result.error || 'Failed to delete dependent');
+      }
+    } catch (error) {
+      console.error('Error deleting dependent:', error);
+      alert('Failed to delete dependent');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  const formatDate = (timestamp: any) => {
+    if (!timestamp) return 'N/A';
+    
+    // If it's already a formatted string from firestore-service
+    if (typeof timestamp === 'string') {
+      return timestamp;
+    }
+    
+    // If it's a Firebase Timestamp object
+    if (timestamp.toDate) {
+      return timestamp.toDate().toLocaleDateString();
+    }
+    
+    // If it's a regular Date or timestamp
+    try {
+      return new Date(timestamp).toLocaleDateString();
+    } catch (error) {
+      console.error('Error formatting date:', error, timestamp);
+      return 'Invalid Date';
+    }
+  };
 
   return (
     <div className="flex min-h-screen w-full flex-col">
@@ -37,7 +140,7 @@ export default function UserDependentsPage() {
               <CardTitle>My Dependents</CardTitle>
               <CardDescription>Manage your dependents linked to your account.</CardDescription>
             </div>
-            <Dialog>
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
               <DialogTrigger asChild>
                 <Button size="sm" className="gap-1">
                   <PlusCircle className="h-3.5 w-3.5" />
@@ -48,57 +151,100 @@ export default function UserDependentsPage() {
                 <DialogHeader>
                   <DialogTitle>Add a New Dependent</DialogTitle>
                   <DialogDescription>
-                    Dependents are considered full members under your payment method.
+                    Dependents are considered full members under your share calculation.
                   </DialogDescription>
                 </DialogHeader>
+                <form onSubmit={handleAddDependent}>
                 <div className="grid gap-4 py-4">
                   <div className="grid gap-2">
                     <Label htmlFor="dependent-name">Dependent's Full Name</Label>
-                    <Input id="dependent-name" placeholder="Jane Doe" />
+                      <Input 
+                        id="dependent-name" 
+                        name="name"
+                        placeholder="Jane Doe" 
+                        required
+                      />
                   </div>
                   <div className="grid gap-2">
                     <Label htmlFor="relationship">Relationship</Label>
-                    <Input id="relationship" placeholder="Spouse, Son, Daughter..." />
-                  </div>
+                      <Input 
+                        id="relationship" 
+                        name="relationship"
+                        placeholder="Spouse, Son, Daughter..." 
+                        required
+                      />
+                    </div>
                 </div>
                 <DialogFooter>
-                  <Button type="submit">Add Dependent</Button>
+                    <Button type="submit" disabled={addingDependent}>
+                      {addingDependent ? (
+                        <>
+                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                          Adding...
+                        </>
+                      ) : (
+                        'Add Dependent'
+                      )}
+                    </Button>
                 </DialogFooter>
+                </form>
               </DialogContent>
             </Dialog>
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Dependent ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Relationship</TableHead>
-                  <TableHead>Date Added</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {userDependents.length > 0 ? (
-                  userDependents.map((dep) => (
-                    <TableRow key={dep.id}>
-                      <TableCell className="font-medium">{dep.id}</TableCell>
-                      <TableCell>{dep.name}</TableCell>
-                      <TableCell>{dep.relationship}</TableCell>
-                      <TableCell>{dep.addedDate}</TableCell>
-                    </TableRow>
-                  ))
-                ) : (
+            {loading ? (
+              <div className="flex items-center justify-center h-24">
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
                   <TableRow>
-                    <TableCell colSpan={4} className="text-center h-24">
-                      You have not added any dependents.
-                    </TableCell>
+                    <TableHead>Dependent ID</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Relationship</TableHead>
+                    <TableHead>Date Added</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {dependents.length > 0 ? (
+                    dependents.map((dep) => (
+                      <TableRow key={dep.id}>
+                        <TableCell className="font-medium">{dep.id}</TableCell>
+                        <TableCell>{dep.name}</TableCell>
+                        <TableCell>{dep.relationship}</TableCell>
+                        <TableCell>{formatDate(dep.addedDate)}</TableCell>
+                        <TableCell>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteDependent(dep.id)}
+                            disabled={deletingId === dep.id}
+                          >
+                            {deletingId === dep.id ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Trash2 className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center h-24">
+                        You have not added any dependents.
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            )}
           </CardContent>
         </Card>
       </main>
     </div>
   );
 }
+

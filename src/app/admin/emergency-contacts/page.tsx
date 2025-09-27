@@ -18,6 +18,7 @@ import {
   Filter
 } from "lucide-react";
 import { EmergencyContact } from "@/contexts/AuthContext";
+import { getAllMembers, getAllDependents } from "@/lib/firestore-service";
 
 interface MemberWithEmergencyContacts {
   id: string;
@@ -34,71 +35,53 @@ export default function AdminEmergencyContactsPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'Active' | 'Inactive'>('all');
   const [isLoading, setIsLoading] = useState(true);
+  const [totalDependents, setTotalDependents] = useState(0);
 
-  // Mock data - in real app, this would come from Firestore
+  // Load real data from Firestore
   useEffect(() => {
-    const mockMembers: MemberWithEmergencyContacts[] = [
-      {
-        id: '1',
-        name: 'John Smith',
-        email: 'john.smith@email.com',
-        phone: '+1 (555) 123-4567',
-        status: 'Active',
-        emergencyContacts: [
-          {
-            name: 'Sarah Smith',
-            relationship: 'Spouse',
-            phone: '+1 (555) 123-4568',
-            email: 'sarah.smith@email.com',
-            address: '123 Main St, New York, NY 10001',
-            isPrimary: true
-          },
-          {
-            name: 'Michael Smith',
-            relationship: 'Son',
-            phone: '+1 (555) 987-6543',
-            email: 'michael.smith@email.com',
-            isPrimary: false
-          }
-        ]
-      },
-      {
-        id: '2',
-        name: 'Emily Johnson',
-        email: 'emily.johnson@email.com',
-        phone: '+1 (555) 234-5678',
-        status: 'Active',
-        emergencyContacts: [
-          {
-            name: 'Robert Johnson',
-            relationship: 'Husband',
-            phone: '+1 (555) 234-5679',
-            email: 'robert.johnson@email.com',
-            address: '456 Oak Ave, Los Angeles, CA 90210',
-            isPrimary: true
-          }
-        ]
-      },
-      {
-        id: '3',
-        name: 'David Wilson',
-        email: 'david.wilson@email.com',
-        phone: '+1 (555) 345-6789',
-        status: 'Inactive',
-        emergencyContacts: [
-          {
-            name: 'Lisa Wilson',
-            relationship: 'Wife',
-            phone: '+1 (555) 345-6790',
-            isPrimary: true
-          }
-        ]
+    const loadMembers = async () => {
+      try {
+        setIsLoading(true);
+        console.log('Loading members and dependents for emergency contacts page...');
+        
+        // Fetch both members and dependents
+        const [allMembers, allDependents] = await Promise.all([
+          getAllMembers(),
+          getAllDependents()
+        ]);
+        
+        console.log('Fetched members:', allMembers);
+        console.log('Fetched dependents:', allDependents);
+        
+        // Transform Firestore data to match our interface - only actual members for display
+        const membersWithEmergencyContacts: MemberWithEmergencyContacts[] = allMembers.map(member => ({
+          id: member.id,
+          name: member.name,
+          email: member.email,
+          phone: member.phone || 'N/A',
+          status: member.status as 'Active' | 'Inactive',
+          emergencyContacts: member.emergencyContacts || []
+        }));
+        
+        // Store dependents count separately for statistics
+        const totalDependents = allDependents.length;
+        
+        console.log('Transformed members:', membersWithEmergencyContacts);
+        console.log('Total members (excluding dependents):', membersWithEmergencyContacts.length);
+        console.log('Total dependents:', totalDependents);
+        console.log('Total people (members + dependents):', membersWithEmergencyContacts.length + totalDependents);
+        
+        setMembers(membersWithEmergencyContacts);
+        setFilteredMembers(membersWithEmergencyContacts);
+        setTotalDependents(totalDependents);
+      } catch (error) {
+        console.error('Error loading members:', error);
+      } finally {
+        setIsLoading(false);
       }
-    ];
+    };
 
-    setMembers(mockMembers);
-    setFilteredMembers(mockMembers);
-    setIsLoading(false);
+    loadMembers();
   }, []);
 
   // Filter members based on search term and status
@@ -243,7 +226,9 @@ export default function AdminEmergencyContactsPage() {
                   <div className="flex items-center gap-3">
                     <User className="h-5 w-5 text-muted-foreground" />
                     <div>
-                      <CardTitle className="text-lg">{member.name}</CardTitle>
+                      <CardTitle className="text-lg">
+                        {member.name}
+                      </CardTitle>
                       <CardDescription>
                         {member.email} • {member.phone}
                       </CardDescription>
@@ -362,7 +347,7 @@ export default function AdminEmergencyContactsPage() {
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Total Members</p>
-                  <p className="text-2xl font-bold">{members.length}</p>
+                  <p className="text-2xl font-bold">{members.length + totalDependents}</p>
                 </div>
               </div>
             </CardContent>
