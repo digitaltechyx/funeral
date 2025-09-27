@@ -209,13 +209,6 @@ export default function AccountPage() {
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium">Wallet Balance</span>
-                    <span className="text-sm font-medium">
-                      ${userProfile?.walletBalance?.toFixed(2) || '0.00'}
-                    </span>
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Sadqa Wallet</span>
                     <span className="text-sm font-medium">
                       ${userProfile?.sadqaWallet?.toFixed(2) || '0.00'}

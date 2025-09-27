@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SidebarTrigger } from '@/components/ui/sidebar';
+import { UserNav } from '@/components/app/user-nav';
 import { getAllMembers, getActiveMembers, getWalletPool, getDashboardData } from '@/lib/firestore-service';
 import { getAllClaims } from '@/lib/claim-actions';
 import { WalletPoolUpdate } from '@/components/wallet-pool-update';
@@ -90,6 +91,9 @@ export function AdminDashboardWrapper() {
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
         <SidebarTrigger />
         <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">Admin Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <UserNav />
+        </div>
       </header>
       <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
       {/* Stats Overview */}

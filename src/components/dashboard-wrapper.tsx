@@ -9,6 +9,7 @@ import { LatestClaimsCard } from "@/components/app/dashboard/latest-claims-card"
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { UserNav } from "@/components/app/user-nav";
 import { Users, HeartHandshake, CircleDollarSign, ShieldCheck, CheckCircle, Building2, Coins, Loader2, RefreshCw } from "lucide-react";
 
 export function DashboardWrapper() {
@@ -51,6 +52,9 @@ export function DashboardWrapper() {
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
           <SidebarTrigger />
           <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">My Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <UserNav />
+          </div>
         </header>
         <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
           <div className="flex items-center justify-center h-64">
@@ -70,6 +74,9 @@ export function DashboardWrapper() {
         <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
           <SidebarTrigger />
           <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">My Dashboard</h1>
+          <div className="flex items-center gap-4">
+            <UserNav />
+          </div>
         </header>
         <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
           <div className="flex items-center justify-center h-64">
@@ -105,6 +112,7 @@ export function DashboardWrapper() {
             <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
+          <UserNav />
         </div>
       </header>
       <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
