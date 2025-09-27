@@ -209,6 +209,17 @@ export default function AccountPage() {
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Payment Method</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      userProfile?.hasPaymentMethod 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {userProfile?.hasPaymentMethod ? 'Active' : 'Not Added'}
+                    </span>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
                     <span className="text-sm font-medium">Sadqa Wallet</span>
                     <span className="text-sm font-medium">
                       ${userProfile?.sadqaWallet?.toFixed(2) || '0.00'}
@@ -233,14 +244,24 @@ export default function AccountPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-medium">Current Status</span>
+                    <span className={`text-xs px-2 py-1 rounded-full ${
+                      userProfile?.hasPaymentMethod 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-red-100 text-red-800'
+                    }`}>
+                      {userProfile?.hasPaymentMethod ? 'Payment Method Added' : 'No Payment Method'}
+                    </span>
+                  </div>
                   <p className="text-sm text-muted-foreground">
-                    Add a payment method to participate in community funeral contributions.
-                    When a funeral claim is approved, all active members will be charged $8 per person (including dependents).
+                    Add a payment method to participate in community memorial contributions.
+                    When a memorial claim is approved, all active members will be charged $8 per person (including dependents).
                   </p>
                   <Button asChild className="w-full">
                     <Link href="/dashboard/account/payment">
                       <CreditCard className="mr-2 h-4 w-4" />
-                      Manage Payment Methods
+                      {userProfile?.hasPaymentMethod ? 'Manage Payment Methods' : 'Add Payment Method'}
                     </Link>
                   </Button>
                 </div>

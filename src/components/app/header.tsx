@@ -23,10 +23,17 @@ export function Header({ title, children }: HeaderProps) {
         {userProfile && (
           <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
             <span>Welcome, {userProfile.name}</span>
-                   <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
-                     {userProfile.role === 'super_admin' ? 'Super Admin' : 
-                      userProfile.role === 'admin' ? 'Admin' : 'Member'}
-                   </span>
+            <span className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
+              {userProfile.role === 'super_admin' ? 'Super Admin' : 
+               userProfile.role === 'admin' ? 'Admin' : 'Member'}
+            </span>
+            <span className={`px-2 py-1 rounded-full text-xs ${
+              userProfile.hasPaymentMethod 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-red-100 text-red-800'
+            }`}>
+              {userProfile.hasPaymentMethod ? 'Active' : 'Inactive'}
+            </span>
           </div>
         )}
         <UserNav />

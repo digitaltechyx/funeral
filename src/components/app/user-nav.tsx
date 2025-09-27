@@ -56,10 +56,19 @@ export function UserNav() {
             <p className="text-xs leading-none text-muted-foreground">
               {userProfile.email}
             </p>
-                   <p className="text-xs leading-none text-primary">
-                     {userProfile.role === 'super_admin' ? 'Super Admin' : 
-                      userProfile.role === 'admin' ? 'Admin' : 'Member'}
-                   </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs leading-none text-primary">
+                {userProfile.role === 'super_admin' ? 'Super Admin' : 
+                 userProfile.role === 'admin' ? 'Admin' : 'Member'}
+              </p>
+              <span className={`text-xs px-2 py-1 rounded-full ${
+                userProfile.hasPaymentMethod 
+                  ? 'bg-green-100 text-green-800' 
+                  : 'bg-red-100 text-red-800'
+              }`}>
+                {userProfile.hasPaymentMethod ? 'Active' : 'Inactive'}
+              </span>
+            </div>
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
