@@ -1,7 +1,7 @@
 'use server';
 
 import { db } from '@/lib/firebase';
-import { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc } from 'firebase/firestore';
+import { doc, updateDoc, serverTimestamp, addDoc, collection, getDoc, getDocs, query, orderBy, where } from 'firebase/firestore';
 import { COLLECTIONS } from '@/lib/database-schema';
 import { getServerStripe } from '@/lib/stripe';
 import { revalidatePath } from 'next/cache';
@@ -162,7 +162,8 @@ export async function getMemberPaymentHistory(memberId: string) {
 export async function getAllPayments() {
   try {
     const paymentsRef = collection(db, COLLECTIONS.PAYMENTS);
-    const paymentsSnapshot = await paymentsRef.get();
+    const q = query(paymentsRef, orderBy('chargedAt', 'desc'));
+    const paymentsSnapshot = await getDocs(q);
     
     const payments = paymentsSnapshot.docs.map(doc => ({
       id: doc.id,
@@ -173,5 +174,55 @@ export async function getAllPayments() {
   } catch (error) {
     console.error('Error fetching all payments:', error);
     return [];
+  }
+}
+
+export async function getChargingReports() {
+  try {
+    const paymentsRef = collection(db, COLLECTIONS.PAYMENTS);
+    const q = query(paymentsRef, orderBy('chargedAt', 'desc'));
+    const paymentsSnapshot = await getDocs(q);
+    
+    const allPayments = paymentsSnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    
+    // Separate successful and failed payments
+    const successfulPayments = allPayments.filter(payment => payment.status === 'completed');
+    const failedPayments = allPayments.filter(payment => payment.status === 'failed');
+    
+    // Calculate statistics
+    const totalSuccessfulAmount = successfulPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+    const totalFailedAmount = failedPayments.reduce((sum, payment) => sum + (payment.amount || 0), 0);
+    const totalMembersCharged = successfulPayments.length;
+    const totalMembersFailed = failedPayments.length;
+    
+    return {
+      successfulPayments,
+      failedPayments,
+      statistics: {
+        totalSuccessfulAmount,
+        totalFailedAmount,
+        totalMembersCharged,
+        totalMembersFailed,
+        successRate: allPayments.length > 0 ? (totalMembersCharged / allPayments.length) * 100 : 0,
+      },
+      allPayments,
+    };
+  } catch (error) {
+    console.error('Error fetching charging reports:', error);
+    return {
+      successfulPayments: [],
+      failedPayments: [],
+      statistics: {
+        totalSuccessfulAmount: 0,
+        totalFailedAmount: 0,
+        totalMembersCharged: 0,
+        totalMembersFailed: 0,
+        successRate: 0,
+      },
+      allPayments: [],
+    };
   }
 }
