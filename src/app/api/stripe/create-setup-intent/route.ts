@@ -4,10 +4,9 @@ import { db } from '@/lib/firebase';
 import { doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getServerStripe } from '@/lib/stripe-server';
 
-const stripe = getServerStripe();
-
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getServerStripe();
     const { userId, memberId } = await request.json();
     const actualUserId = userId || memberId;
 
@@ -20,6 +19,8 @@ export async function POST(request: NextRequest) {
     // Get user profile from Firestore
     const userRef = doc(db, 'users', actualUserId);
     const userDoc = await getDoc(userRef);
+
+    console.log('User document exists:', userDoc.exists());
 
     if (!userDoc.exists()) {
       console.log('User not found in Firestore, creating basic profile for:', actualUserId);
@@ -35,6 +36,7 @@ export async function POST(request: NextRequest) {
         createdAt: new Date(),
         updatedAt: new Date()
       });
+      console.log('Basic user profile created');
     }
 
     const userData = userDoc.exists() ? userDoc.data() : {
@@ -46,7 +48,10 @@ export async function POST(request: NextRequest) {
     // Ensure user has a Stripe customer ID
     let customerId = userData.stripeCustomerId;
     
+    console.log('Current customer ID:', customerId);
+    
     if (!customerId) {
+      console.log('Creating new Stripe customer...');
       // Create customer if doesn't exist
       const customer = await stripe.customers.create({
         email: userData.email,
@@ -57,14 +62,17 @@ export async function POST(request: NextRequest) {
       });
       
       customerId = customer.id;
+      console.log('Stripe customer created:', customerId);
       
       // Update user document with Stripe customer ID
       await updateDoc(userRef, {
         stripeCustomerId: customerId,
         updatedAt: new Date()
       });
+      console.log('User document updated with customer ID');
     }
 
+    console.log('Creating setup intent for customer:', customerId);
     // Create setup intent
     const setupIntent = await stripe.setupIntents.create({
       customer: customerId,
@@ -75,6 +83,8 @@ export async function POST(request: NextRequest) {
         allow_redirects: 'never'
       }
     });
+    
+    console.log('Setup intent created successfully:', setupIntent.id);
 
     return NextResponse.json({ 
       success: true,
@@ -84,8 +94,17 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error creating setup intent:', error);
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      userId: userId,
+      memberId: memberId
+    });
     return NextResponse.json(
-      { error: 'Failed to create setup intent' },
+      { 
+        error: 'Failed to create setup intent',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }
