@@ -175,6 +175,7 @@ export interface TransparencyReport {
   }[];
   totalExpenses: number;
   billImageUrls: string[]; // URLs to uploaded bill images/PDFs
+  wordDocumentUrl?: string; // URL to uploaded Word document report
   createdAt: Timestamp;
   updatedAt: Timestamp;
   createdBy: string; // Admin user ID

@@ -10,12 +10,13 @@ import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
-import { Loader2, Plus, FileText, DollarSign, Receipt, Calendar, AlertCircle, Edit, Trash2, Eye } from "lucide-react";
+import { Loader2, Plus, FileText, DollarSign, Receipt, Calendar, AlertCircle, Edit, Trash2, Eye, Upload, File } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import imageCompression from 'browser-image-compression';
 import { getAllTransparencyReports, createTransparencyReport, uploadBillImages, updateTransparencyReport, deleteTransparencyReport } from '@/lib/firestore-service';
+import { uploadWordDocument } from '@/lib/word-document-actions';
 
 // Types
 interface ExpenseItem {
@@ -32,6 +33,7 @@ interface TransparencyReport {
   totalExpenses: number;
   expenses: ExpenseItem[];
   billImages: string[];
+  wordDocumentUrl?: string;
   createdBy: string;
   createdAt: string;
   status: 'Draft' | 'Published';
@@ -76,6 +78,8 @@ export default function AdminTransparencyReportsPage() {
   const [editingReport, setEditingReport] = useState<TransparencyReport | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [wordDocument, setWordDocument] = useState<File | null>(null);
+  const [isUploadingWord, setIsUploadingWord] = useState(false);
 
   // Form for transparency report
   const reportForm = useForm<TransparencyReportForm>({
@@ -138,6 +142,27 @@ export default function AdminTransparencyReportsPage() {
     setEditingReport(null);
     setIsEditing(false);
     setExpenseDialogOpen(false);
+    setWordDocument(null);
+  };
+
+  const handleWordDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    
+    // Validate file type
+    if (!file.name.toLowerCase().endsWith('.docx') && !file.name.toLowerCase().endsWith('.doc')) {
+      alert('Please select a Word document (.docx or .doc file)');
+      return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
+      return;
+    }
+    
+    setWordDocument(file);
   };
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -199,6 +224,24 @@ export default function AdminTransparencyReportsPage() {
         billImageUrls = await uploadBillImages(selectedFiles, reportId);
       }
       
+      // Upload Word document if any
+      let wordDocumentUrl: string | undefined;
+      if (wordDocument) {
+        setIsUploadingWord(true);
+        const reportId = Date.now().toString(); // Temporary ID for file upload
+        const uploadResult = await uploadWordDocument(wordDocument, reportId);
+        
+        if (uploadResult.success && uploadResult.url) {
+          wordDocumentUrl = uploadResult.url;
+          console.log('Word document uploaded successfully:', wordDocumentUrl);
+        } else {
+          console.error('Failed to upload Word document:', uploadResult.error);
+          alert('Failed to upload Word document. Please try again.');
+          return;
+        }
+        setIsUploadingWord(false);
+      }
+      
       if (isEditing && editingReport) {
         // Update existing report
         await updateTransparencyReport(editingReport.id, {
@@ -208,6 +251,7 @@ export default function AdminTransparencyReportsPage() {
           expenses: currentExpenses,
           totalExpenses,
           billImageUrls: billImageUrls.length > 0 ? billImageUrls : editingReport.billImageUrls,
+          wordDocumentUrl: wordDocumentUrl || editingReport.wordDocumentUrl,
         });
         console.log('Transparency report updated:', editingReport.id);
       } else {
@@ -219,6 +263,7 @@ export default function AdminTransparencyReportsPage() {
           expenses: currentExpenses,
           totalExpenses,
           billImageUrls,
+          wordDocumentUrl,
           createdBy: 'Admin' // TODO: Get from auth context
         });
         console.log('Transparency report created with ID:', reportId);
@@ -234,6 +279,7 @@ export default function AdminTransparencyReportsPage() {
       console.error('Error saving transparency report:', error);
     } finally {
       setIsSubmitting(false);
+      setIsUploadingWord(false);
     }
   };
 
@@ -442,6 +488,34 @@ export default function AdminTransparencyReportsPage() {
                     </div>
                   ) : (
                     <p className="text-muted-foreground text-center py-4">No expenses added yet</p>
+                  )}
+                </div>
+
+                {/* Word Document Upload */}
+                <div>
+                  <Label htmlFor="wordDocument">Word Document Report (Optional)</Label>
+                  <Input
+                    id="wordDocument"
+                    type="file"
+                    accept=".docx,.doc"
+                    onChange={handleWordDocumentChange}
+                    className="mt-1"
+                    disabled={isUploadingWord}
+                  />
+                  <p className="text-sm text-muted-foreground mt-1">
+                    Upload a Word document report (e.g., downloaded from Charging Reports). Max size: 10MB.
+                  </p>
+                  
+                  {wordDocument && (
+                    <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <File className="h-4 w-4 text-green-600" />
+                        <span className="text-sm font-medium text-green-800">{wordDocument.name}</span>
+                        <span className="text-xs text-green-600">
+                          ({(wordDocument.size / 1024 / 1024).toFixed(2)} MB)
+                        </span>
+                      </div>
+                    </div>
                   )}
                 </div>
 
@@ -670,6 +744,30 @@ export default function AdminTransparencyReportsPage() {
                     </Table>
                   </div>
                 </div>
+
+                {selectedReport.wordDocumentUrl && (
+                  <div>
+                    <h3 className="font-semibold mb-2">Word Document Report</h3>
+                    <div className="border rounded-lg p-4 bg-blue-50">
+                      <div className="flex items-center gap-3">
+                        <File className="h-8 w-8 text-blue-600" />
+                        <div>
+                          <p className="font-medium text-blue-800">Charging Report Document</p>
+                          <p className="text-sm text-blue-600">Download the detailed Word report</p>
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => window.open(selectedReport.wordDocumentUrl, '_blank')}
+                          className="ml-auto"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          Download
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {selectedReport.billImageUrls && selectedReport.billImageUrls.length > 0 && (
                   <div>

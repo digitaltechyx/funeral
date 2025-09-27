@@ -425,6 +425,7 @@ export async function createTransparencyReport(reportData: {
   }[];
   totalExpenses: number;
   billImageUrls: string[];
+  wordDocumentUrl?: string;
   createdBy: string;
 }) {
   try {
@@ -476,6 +477,7 @@ export async function updateTransparencyReport(reportId: string, updateData: {
   }[];
   totalExpenses?: number;
   billImageUrls?: string[];
+  wordDocumentUrl?: string;
   status?: 'Draft' | 'Published';
 }) {
   try {
