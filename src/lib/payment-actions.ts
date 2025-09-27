@@ -67,46 +67,50 @@ export async function chargeSelectedMembers(
         description: `Memorial Share - ${member.totalShares} share(s) @ $${amountPerShare} each`,
       });
 
-      if (paymentIntent.status === 'succeeded') {
-        // Create payment record in Firestore
-        await addDoc(collection(db, COLLECTIONS.PAYMENTS), {
-          memberId: member.id,
-          memberName: member.name,
-          memberEmail: member.email,
+      // Create payment record in Firestore for both successful and failed payments
+      const paymentRecord = {
+        memberId: member.id,
+        memberName: member.name,
+        memberEmail: member.email,
+        amount: totalAmount,
+        shares: member.totalShares,
+        amountPerShare: amountPerShare,
+        paymentIntentId: paymentIntent.id,
+        status: paymentIntent.status === 'succeeded' ? 'completed' : 'failed',
+        type: 'memorial_share',
+        chargedAt: serverTimestamp(),
+        createdAt: serverTimestamp(),
+        error: paymentIntent.status !== 'succeeded' ? `Payment failed: ${paymentIntent.status}` : undefined,
+      };
+
+      await addDoc(collection(db, COLLECTIONS.PAYMENTS), paymentRecord);
+
+      // Update member's payment history
+      const memberRef = doc(db, COLLECTIONS.MEMBERS, member.id);
+      const memberDoc = await getDoc(memberRef);
+      
+      if (memberDoc.exists()) {
+        const memberData = memberDoc.data();
+        const newPayment = {
+          id: paymentIntent.id,
           amount: totalAmount,
           shares: member.totalShares,
           amountPerShare: amountPerShare,
-          paymentIntentId: paymentIntent.id,
-          status: 'completed',
+          date: new Date(),
           type: 'memorial_share',
-          chargedAt: serverTimestamp(),
-          createdAt: serverTimestamp(),
+          status: paymentIntent.status === 'succeeded' ? 'completed' : 'failed',
+          paymentIntentId: paymentIntent.id,
+          error: paymentIntent.status !== 'succeeded' ? `Payment failed: ${paymentIntent.status}` : undefined,
+        };
+
+        await updateDoc(memberRef, {
+          paymentHistory: [...(memberData.paymentHistory || []), newPayment],
+          lastPaymentDate: serverTimestamp(),
+          updatedAt: serverTimestamp(),
         });
+      }
 
-        // Update member's payment history
-        const memberRef = doc(db, COLLECTIONS.MEMBERS, member.id);
-        const memberDoc = await getDoc(memberRef);
-        
-        if (memberDoc.exists()) {
-          const memberData = memberDoc.data();
-          const newPayment = {
-            id: paymentIntent.id,
-            amount: totalAmount,
-            shares: member.totalShares,
-            amountPerShare: amountPerShare,
-            date: new Date(),
-            type: 'memorial_share',
-            status: 'completed',
-            paymentIntentId: paymentIntent.id,
-          };
-
-          await updateDoc(memberRef, {
-            paymentHistory: [...(memberData.paymentHistory || []), newPayment],
-            lastPaymentDate: serverTimestamp(),
-            updatedAt: serverTimestamp(),
-          });
-        }
-
+      if (paymentIntent.status === 'succeeded') {
         results.push({
           memberId: member.id,
           memberName: member.name,
@@ -124,15 +128,68 @@ export async function chargeSelectedMembers(
           error: `Payment failed: ${paymentIntent.status}`,
           amount: totalAmount,
         });
+
+        console.log(`Failed to charge member ${member.name}: ${paymentIntent.status}`);
       }
     } catch (error) {
       console.error(`Error charging member ${member.name}:`, error);
+      
+      const totalAmount = member.totalShares * amountPerShare;
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      
+      // Store failed payment in database
+      try {
+        const paymentRecord = {
+          memberId: member.id,
+          memberName: member.name,
+          memberEmail: member.email,
+          amount: totalAmount,
+          shares: member.totalShares,
+          amountPerShare: amountPerShare,
+          paymentIntentId: null,
+          status: 'failed',
+          type: 'memorial_share',
+          chargedAt: serverTimestamp(),
+          createdAt: serverTimestamp(),
+          error: errorMessage,
+        };
+
+        await addDoc(collection(db, COLLECTIONS.PAYMENTS), paymentRecord);
+
+        // Update member's payment history
+        const memberRef = doc(db, COLLECTIONS.MEMBERS, member.id);
+        const memberDoc = await getDoc(memberRef);
+        
+        if (memberDoc.exists()) {
+          const memberData = memberDoc.data();
+          const newPayment = {
+            id: `failed_${Date.now()}`,
+            amount: totalAmount,
+            shares: member.totalShares,
+            amountPerShare: amountPerShare,
+            date: new Date(),
+            type: 'memorial_share',
+            status: 'failed',
+            paymentIntentId: null,
+            error: errorMessage,
+          };
+
+          await updateDoc(memberRef, {
+            paymentHistory: [...(memberData.paymentHistory || []), newPayment],
+            lastPaymentDate: serverTimestamp(),
+            updatedAt: serverTimestamp(),
+          });
+        }
+      } catch (dbError) {
+        console.error('Error storing failed payment:', dbError);
+      }
+      
       results.push({
         memberId: member.id,
         memberName: member.name,
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
-        amount: member.totalShares * amountPerShare,
+        error: errorMessage,
+        amount: totalAmount,
       });
     }
   }
