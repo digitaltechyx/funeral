@@ -8,21 +8,40 @@ const stripe = getServerStripe();
 
 export async function POST(request: NextRequest) {
   try {
-    const { userId } = await request.json();
+    const { userId, memberId } = await request.json();
+    const actualUserId = userId || memberId;
 
-    if (!userId) {
+    if (!actualUserId) {
       return NextResponse.json({ error: 'User ID is required' }, { status: 400 });
     }
 
+    console.log('Setup intent request:', { userId, memberId, actualUserId });
+
     // Get user profile from Firestore
-    const userRef = doc(db, 'users', userId);
+    const userRef = doc(db, 'users', actualUserId);
     const userDoc = await getDoc(userRef);
 
     if (!userDoc.exists()) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+      console.log('User not found in Firestore, creating basic profile for:', actualUserId);
+      // Create a basic user profile if it doesn't exist
+      const { setDoc } = await import('firebase/firestore');
+      await setDoc(userRef, {
+        id: actualUserId,
+        name: 'User',
+        email: 'user@example.com',
+        phone: '',
+        stripeCustomerId: null,
+        hasPaymentMethod: false,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      });
     }
 
-    const userData = userDoc.data();
+    const userData = userDoc.exists() ? userDoc.data() : {
+      name: 'User',
+      email: 'user@example.com',
+      stripeCustomerId: null
+    };
 
     // Ensure user has a Stripe customer ID
     let customerId = userData.stripeCustomerId;
@@ -33,7 +52,7 @@ export async function POST(request: NextRequest) {
         email: userData.email,
         name: userData.name,
         metadata: {
-          userId: userId
+          userId: actualUserId
         }
       });
       

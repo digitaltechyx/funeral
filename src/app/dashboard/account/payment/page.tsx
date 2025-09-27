@@ -74,10 +74,13 @@ function PaymentMethodForm() {
       if (confirmError) {
         throw new Error(confirmError.message || 'Failed to add payment method');
       } else {
+        console.log('Stripe setup succeeded, updating user payment method status...');
         // Update user's payment method status in Firestore
         const updateResult = await updateUserPaymentMethodStatus(user.uid, true);
+        console.log('Update result:', updateResult);
         
         if (updateResult.success) {
+          console.log('Status update successful, refreshing user profile...');
           // Refresh user profile to get updated payment method status
           await refreshUserProfile();
           
@@ -87,6 +90,7 @@ function PaymentMethodForm() {
           });
           setHasPaymentMethod(true);
         } else {
+          console.log('Status update failed:', updateResult.error);
           toast({
             variant: "destructive",
             title: "Payment Method Added",
