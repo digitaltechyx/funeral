@@ -38,7 +38,10 @@ export default function PaymentHistoryPage() {
   const fetchPaymentHistory = async () => {
     try {
       setLoading(true);
+      console.log('User UID:', user?.uid);
+      console.log('User Profile:', userProfile);
       const paymentHistory = await getMemberPaymentHistory(user?.uid || '');
+      console.log('Payment history result:', paymentHistory);
       setPayments(paymentHistory);
     } catch (error) {
       console.error('Error fetching payment history:', error);

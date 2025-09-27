@@ -134,6 +134,13 @@ export default function AdminPaymentsPage() {
         member.status === 'Active'
       );
 
+      console.log('Charging members:', membersToCharge.map(m => ({ 
+        id: m.id, 
+        name: m.name, 
+        email: m.email,
+        stripeCustomerId: m.stripeCustomerId,
+        stripePaymentMethodId: m.stripePaymentMethodId
+      })));
       const results = await chargeSelectedMembers(membersToCharge, shareAmount);
 
       setChargingResults(results);
