@@ -126,7 +126,7 @@ export default function UserDependentsPage() {
               <div>
                 <h3 className="font-semibold text-orange-900">Important Notice</h3>
                 <p className="text-sm text-orange-800 mt-1">
-                  Please note: As the Head of Household, you are responsible for the funeral shares of all your dependents. 
+                  Please note: As the Head of Household, you are responsible for the memorial shares of all your dependents. 
                   Each dependent is counted as a full member when calculating contributions.
                 </p>
               </div>

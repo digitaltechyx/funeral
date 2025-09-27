@@ -133,7 +133,7 @@ export default function SetupAdminPage() {
             Admin Setup
           </CardTitle>
           <CardDescription className="text-center">
-            Create the admin account for Funeral Share Community
+            Create the admin account for Memorial Share Community
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">

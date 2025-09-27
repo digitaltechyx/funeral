@@ -4,7 +4,7 @@ export const APP_CONFIG = {
   contact: {
     whatsapp: {
       phoneNumber: "+1234567890", // Replace with your actual WhatsApp number
-      defaultMessage: "Hello! I need help with my Funeral Share account.",
+      defaultMessage: "Hello! I need help with my Memorial Share account.",
     },
     phone: "+1234567890", // Replace with your actual phone number
     email: "support@funeralshare.com", // Replace with your actual support email
@@ -12,7 +12,7 @@ export const APP_CONFIG = {
 
   // Business Information
   business: {
-    name: "Funeral Share Community",
+    name: "Memorial Share Community",
     hours: {
       regular: "Mon-Fri 9AM-6PM EST",
       emergency: "Available 24/7",

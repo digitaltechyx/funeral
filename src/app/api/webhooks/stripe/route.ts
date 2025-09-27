@@ -131,7 +131,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
         id: invoice.id,
         amount: invoice.amount_paid / 100, // Convert from cents
         date: new Date(),
-        type: 'funeral_share',
+        type: 'memorial_share',
         status: 'completed',
         invoiceUrl: invoice.invoice_pdf,
       };

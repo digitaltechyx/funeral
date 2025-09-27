@@ -14,7 +14,7 @@ export default function SignupPage() {
                 <Handshake className="h-8 w-8 text-primary-foreground" />
             </div>
         </div>
-        <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">Join FuneralShare</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">Join Memorial Share</h1>
         <p className="mt-2 text-lg text-muted-foreground">Create your account to join our community.</p>
       </div>
 

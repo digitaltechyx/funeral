@@ -94,7 +94,7 @@ export interface Payment {
   amountPerShare: number;
   paymentIntentId: string;
   status: 'pending' | 'completed' | 'failed';
-  type: 'funeral_share' | 'sadqa_donation' | 'other';
+  type: 'memorial_share' | 'sadqa_donation' | 'other';
   chargedAt: Timestamp;
   createdAt: Timestamp;
   updatedAt: Timestamp;

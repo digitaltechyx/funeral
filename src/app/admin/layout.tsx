@@ -1,6 +1,5 @@
 'use client';
 
-import { Header } from "@/components/app/header";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BarChart3, Handshake, Landmark, LayoutDashboard, Phone, ShieldCheck, Users, UserPlus, Users2, UserCog, FileText } from "lucide-react";
@@ -21,7 +20,7 @@ function AdminSidebar() {
               <div className="bg-primary p-2 rounded-lg">
                   <Handshake className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="font-semibold text-lg font-headline">FuneralShare</span>
+              <span className="font-semibold text-lg font-headline">Memorial Share</span>
           </Link>
       </SidebarHeader>
       <SidebarContent className="p-2">
@@ -127,7 +126,6 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <SidebarProvider>
         <AdminSidebar />
         <SidebarInset>
-          {/* Header will be part of the page content */}
           {children}
         </SidebarInset>
       </SidebarProvider>

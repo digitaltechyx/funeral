@@ -68,10 +68,10 @@ export default function LoginPage() {
           </div>
         </div>
         <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">
-          Funeral Share Community
+          Memorial Share Community
         </h1>
         <p className="mt-2 text-lg text-muted-foreground max-w-2xl">
-          Community-based funeral assistance for New Jersey. Supporting each other in times of need with transparency and trust.
+          Community-based memorial assistance for New Jersey. Supporting each other in times of need with transparency and trust.
         </p>
       </div>
 
@@ -164,7 +164,7 @@ export default function LoginPage() {
       )}
 
       <footer className="mt-12 text-center text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} Funeral Share Community. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Memorial Share Community. All rights reserved.</p>
         <p className="text-sm">Built on trust and mutual support.</p>
       </footer>
     </main>

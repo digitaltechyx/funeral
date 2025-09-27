@@ -3,12 +3,12 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { getUserDashboardData } from "@/lib/firestore-service";
 import { useEffect, useState } from "react";
-import { Header } from "@/components/app/header";
 import { StatCard } from "@/components/app/dashboard/stat-card";
 import { TransparencyReportCard } from "@/components/app/dashboard/transparency-report-card";
 import { LatestClaimsCard } from "@/components/app/dashboard/latest-claims-card";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Users, HeartHandshake, CircleDollarSign, ShieldCheck, CheckCircle, Building2, Coins, Loader2, RefreshCw } from "lucide-react";
 
 export function DashboardWrapper() {
@@ -34,21 +34,24 @@ export function DashboardWrapper() {
     loadDashboardData();
   }, [user?.uid]);
 
-  // Auto-refresh dashboard data every 30 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (user?.uid && !loading) {
-        loadDashboardData();
-      }
-    }, 30000); // 30 seconds
+  // Auto-refresh disabled - manual refresh only
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (user?.uid && !loading) {
+  //       loadDashboardData();
+  //     }
+  //   }, 30000); // 30 seconds
 
-    return () => clearInterval(interval);
-  }, [user?.uid, loading]);
+  //   return () => clearInterval(interval);
+  // }, [user?.uid, loading]);
 
   if (loading) {
     return (
       <div className="flex min-h-screen w-full flex-col">
-        <Header title="My Dashboard" />
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
+          <SidebarTrigger />
+          <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">My Dashboard</h1>
+        </header>
         <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
           <div className="flex items-center justify-center h-64">
             <div className="text-center">
@@ -64,7 +67,10 @@ export function DashboardWrapper() {
   if (!data) {
     return (
       <div className="flex min-h-screen w-full flex-col">
-        <Header title="My Dashboard" />
+        <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
+          <SidebarTrigger />
+          <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">My Dashboard</h1>
+        </header>
         <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
           <div className="flex items-center justify-center h-64">
             <p>Unable to load dashboard data.</p>
@@ -80,23 +86,27 @@ export function DashboardWrapper() {
   const formattedSadqaWallet = `$${data.sadqaWallet.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   const formattedUserTotalPayment = `$${data.userTotalPayment?.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) || '0.00'}`;
   
-  // Calculate how many funerals the wallet pool can cover
-  // Each funeral costs $8,000 (fixed cost)
-  const funeralsCanCover = data.walletPool / 8000;
+  // Calculate how many memorials the wallet pool can cover
+  // Each memorial costs $8,000 (fixed cost)
+  const memorialsCanCover = data.walletPool / 8000;
 
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <Header title="My Dashboard">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={loadDashboardData}
-          disabled={loading}
-        >
-          <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
-      </Header>
+      <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
+        <SidebarTrigger />
+        <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">My Dashboard</h1>
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={loadDashboardData}
+            disabled={loading}
+          >
+            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+        </div>
+      </header>
       <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
         {/* Welcome Message */}
         <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 mb-6">
@@ -107,13 +117,13 @@ export function DashboardWrapper() {
                   <CheckCircle className="h-5 w-5 text-green-600" />
                 </div>
                 <h2 className="text-xl font-bold text-green-900">
-                  Congratulations! Memorial Share has reached {data.activeMembers} members
+                  Congratulations! Memorial Share has reached {data.activeMembers} Total Members
                 </h2>
               </div>
               
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <p className="text-yellow-800 font-semibold">
-                  To officially begin the funeral assistance, we need 1,000 total members (including dependents).
+                  To officially begin the memorial assistance, we need 1,000 total members (including dependents).
                 </p>
               </div>
 
@@ -129,11 +139,11 @@ export function DashboardWrapper() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">How does the share system work?</h3>
                   <p className="text-gray-700">
-                    Each member (including dependents) pays a fixed <span className="font-bold text-green-600">$8 per funeral</span>. 
+                    Each member (including dependents) pays a fixed <span className="font-bold text-green-600">$8 per memorial</span>. 
                     This simple, transparent pricing ensures everyone contributes equally to support our community.
                   </p>
                   <p className="text-gray-700 mt-2">
-                    <span className="font-bold text-blue-600">Your share:</span> You pay for {data.userTotalShares || 1} members (1 for yourself + {data.dependentsCount} for dependents) = <span className="font-bold text-green-600">{formattedUserTotalPayment}</span> per funeral.
+                    <span className="font-bold text-blue-600">Your share:</span> You pay for {data.userTotalShares || 1} members (1 for yourself + {data.dependentsCount} for dependents) = <span className="font-bold text-green-600">{formattedUserTotalPayment}</span> per memorial.
                   </p>
                 </div>
 
@@ -159,17 +169,17 @@ export function DashboardWrapper() {
             className="bg-teal-50 border-teal-200"
           />
           <StatCard 
-            title="MEMBERS" 
+            title="TOTAL MEMBERS" 
             value={data.totalMembers} 
             icon={Users} 
-            description="Total register members"
+            description="Total Members"
             className="bg-blue-50 border-blue-200"
           />
           <StatCard 
             title="JANAZAH" 
             value={data.totalFunerals} 
             icon={ShieldCheck} 
-            description="Total Janazah conducted so far"
+            description="Total Memorials conducted so far"
             className="bg-purple-50 border-purple-200"
           />
           <StatCard 
@@ -187,7 +197,7 @@ export function DashboardWrapper() {
             title="WALLET POOL" 
             value={formattedWalletPool} 
             icon={Building2} 
-            description={`${funeralsCanCover.toFixed(3)} Funeral${funeralsCanCover !== 1 ? 's' : ''} Can Cover`}
+            description={`${memorialsCanCover.toFixed(3)} Memorial${memorialsCanCover !== 1 ? 's' : ''} Can Cover`}
             className="bg-purple-50 border-purple-200"
           />
           <StatCard 

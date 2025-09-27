@@ -147,7 +147,7 @@ members.forEach(member => {
 });
 
 export const auditLogsForAI = JSON.stringify({
-  description: "A log of all financial transactions within the FuneralShare community system.",
+  description: "A log of all financial transactions within the Memorial Share community system.",
   transactions: [
     ...members.flatMap(m => m.paymentHistory.map(p => ({
       type: 'deduction',

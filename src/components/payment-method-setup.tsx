@@ -158,7 +158,7 @@ export function PaymentMethodSetup({ onSuccess }: PaymentMethodSetupProps) {
             Payment Method Added
           </CardTitle>
           <CardDescription>
-            You have successfully added a payment method. You are now eligible for funeral share charges.
+            You have successfully added a payment method. You are now eligible for memorial share charges.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -179,7 +179,7 @@ export function PaymentMethodSetup({ onSuccess }: PaymentMethodSetupProps) {
           Add Payment Method
         </CardTitle>
         <CardDescription>
-          Add a payment method to become eligible for funeral share charges. This is required to participate in the community.
+          Add a payment method to become eligible for memorial share charges. This is required to participate in the community.
         </CardDescription>
       </CardHeader>
       <CardContent>

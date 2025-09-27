@@ -1,4 +1,3 @@
-import { Header } from "@/components/app/header";
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { Handshake, HeartHandshake, Home, Landmark, Phone, ShieldCheck, User } from "lucide-react";
@@ -15,7 +14,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <div className="bg-primary p-2 rounded-lg">
                     <Handshake className="h-6 w-6 text-primary-foreground" />
                 </div>
-                <span className="font-semibold text-lg font-headline">FuneralShare</span>
+                <span className="font-semibold text-lg font-headline">Memorial Share</span>
             </Link>
         </SidebarHeader>
         <SidebarContent className="p-2">

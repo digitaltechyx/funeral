@@ -81,8 +81,8 @@ export default function PaymentHistoryPage() {
 
   const getTypeBadge = (type: string) => {
     switch (type) {
-      case 'funeral_share':
-        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Funeral Share</Badge>;
+      case 'memorial_share':
+        return <Badge variant="outline" className="bg-blue-50 text-blue-700">Memorial Share</Badge>;
       case 'sadqa_donation':
         return <Badge variant="outline" className="bg-purple-50 text-purple-700">Sadqa Donation</Badge>;
       default:
@@ -200,7 +200,7 @@ export default function PaymentHistoryPage() {
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <h4 className="font-medium mb-2">Funeral Share Payments</h4>
+                <h4 className="font-medium mb-2">Memorial Share Payments</h4>
                 <ul className="text-sm text-muted-foreground space-y-1">
                   <li>• Each member pays $8 per share</li>
                   <li>• You pay for yourself + your dependents</li>

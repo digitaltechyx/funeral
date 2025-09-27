@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { SidebarTrigger } from '@/components/ui/sidebar';
 import { getAllMembers, getActiveMembers, getWalletPool, getDashboardData } from '@/lib/firestore-service';
 import { getAllClaims } from '@/lib/claim-actions';
 import { WalletPoolUpdate } from '@/components/wallet-pool-update';
@@ -85,7 +86,12 @@ export function AdminDashboardWrapper() {
   const eachShareAmount = dashboardData.eachShareAmount;
 
   return (
-    <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
+    <div className="flex min-h-screen w-full flex-col">
+      <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
+        <SidebarTrigger />
+        <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">Admin Dashboard</h1>
+      </header>
+      <main className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8 bg-background">
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
@@ -343,6 +349,7 @@ export function AdminDashboardWrapper() {
           )}
         </CardContent>
       </Card>
-    </main>
+      </main>
+    </div>
   );
 }

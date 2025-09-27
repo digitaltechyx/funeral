@@ -12,9 +12,9 @@ export default function LoginPage() {
             <Handshake className="h-8 w-8 text-primary-foreground" />
           </div>
         </div>
-        <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">FuneralShare Community</h1>
+        <h1 className="text-4xl font-bold tracking-tight text-foreground font-headline">Memorial Share Community</h1>
         <p className="mt-2 text-lg text-muted-foreground max-w-2xl">
-          Community-based funeral assistance for New Jersey. Supporting each other in times of need with transparency and trust.
+          Community-based memorial assistance for New Jersey. Supporting each other in times of need with transparency and trust.
         </p>
       </div>
 
@@ -39,7 +39,7 @@ export default function LoginPage() {
         </Card>
       </div>
        <footer className="mt-12 text-center text-muted-foreground">
-        <p>&copy; {new Date().getFullYear()} FuneralShare Community. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Memorial Share Community. All rights reserved.</p>
         <p className="text-sm">Built on trust and mutual support.</p>
       </footer>
     </main>

@@ -57,11 +57,11 @@ export async function chargeSelectedMembers(
         confirm: true,
         metadata: {
           memberId: member.id,
-          type: 'funeral_share',
+          type: 'memorial_share',
           shares: member.totalShares.toString(),
           amountPerShare: amountPerShare.toString(),
         },
-        description: `Funeral Share - ${member.totalShares} share(s) @ $${amountPerShare} each`,
+        description: `Memorial Share - ${member.totalShares} share(s) @ $${amountPerShare} each`,
       });
 
       if (paymentIntent.status === 'succeeded') {
@@ -75,7 +75,7 @@ export async function chargeSelectedMembers(
           amountPerShare: amountPerShare,
           paymentIntentId: paymentIntent.id,
           status: 'completed',
-          type: 'funeral_share',
+          type: 'memorial_share',
           chargedAt: serverTimestamp(),
           createdAt: serverTimestamp(),
         });
@@ -92,7 +92,7 @@ export async function chargeSelectedMembers(
             shares: member.totalShares,
             amountPerShare: amountPerShare,
             date: new Date(),
-            type: 'funeral_share',
+            type: 'memorial_share',
             status: 'completed',
             paymentIntentId: paymentIntent.id,
           };

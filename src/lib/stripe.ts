@@ -54,7 +54,7 @@ export async function createStripeCustomer(memberData: {
   }
 }
 
-// Create a payment intent for funeral share
+// Create a payment intent for memorial share
 export async function createPaymentIntent(
   amount: number,
   memberId: string,
@@ -72,9 +72,9 @@ export async function createPaymentIntent(
       confirm: true,
       metadata: {
         memberId: memberId,
-        type: 'funeral_share',
+        type: 'memorial_share',
       },
-      description: 'Funeral Share Community - Funeral Assistance Payment',
+      description: 'Memorial Share Community - Memorial Assistance Payment',
     });
 
     return paymentIntent;

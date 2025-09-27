@@ -29,7 +29,7 @@ const transparencyReportPrompt = ai.definePrompt({
   name: 'transparencyReportPrompt',
   input: {schema: GenerateTransparencyReportInputSchema},
   output: {schema: GenerateTransparencyReportOutputSchema},
-  prompt: `You are an AI assistant tasked with generating a transparent and concise summary from financial audit logs for the members of Funeral Share Community in New Jersey.
+  prompt: `You are an AI assistant tasked with generating a transparent and concise summary from financial audit logs for the members of Memorial Share Community in New Jersey.
 
   Given the audit logs below, reason through the transactions and activities, and create a summary that highlights key financial activities, overall financial health, and any important information that the community members should be aware of. Your summary should foster trust and transparency within the community.
 
