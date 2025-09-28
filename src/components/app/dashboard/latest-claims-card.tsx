@@ -88,15 +88,15 @@ export function LatestClaimsCard() {
 
   return (
     <Card>
-      <CardHeader>
+            <CardHeader>
         <CardTitle>Latest Claim</CardTitle>
         <CardDescription>Most recently submitted funeral claim</CardDescription>
-      </CardHeader>
+            </CardHeader>
       <CardContent>
         <div className="space-y-4">
           {/* Claim Header */}
           <div className="flex items-start justify-between">
-            <div>
+                <div>
               <h3 className="font-medium text-lg">{latestClaim.deceasedName}</h3>
               <p className="text-sm text-muted-foreground">
                 Submitted by {latestClaim.memberName}
@@ -105,20 +105,20 @@ export function LatestClaimsCard() {
             <Badge className={getStatusColor(latestClaim.status)}>
               {latestClaim.status}
             </Badge>
-          </div>
+                        </div>
 
           {/* Claim Details */}
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <span>Date of Death: {format(latestClaim.dateOfDeath, 'MMM dd, yyyy')}</span>
-            </div>
+                        </div>
             
             <div className="flex items-center gap-2 text-sm">
               <MapPin className="h-4 w-4 text-muted-foreground" />
               <span>{latestClaim.city}, {latestClaim.state}</span>
-            </div>
-            
+                    </div>
+                    
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-muted-foreground" />
               <span>Relationship: {latestClaim.relationship}</span>
@@ -128,8 +128,8 @@ export function LatestClaimsCard() {
               <FileText className="h-4 w-4 text-muted-foreground" />
               <span>Submitted: {format(latestClaim.submissionDate, 'MMM dd, yyyy')}</span>
             </div>
-          </div>
-
+                </div>
+                
           {/* Action Buttons */}
           <div className="flex gap-2 pt-2">
             <Button asChild variant="outline" size="sm" className="flex-1">
@@ -148,8 +148,8 @@ export function LatestClaimsCard() {
               </Button>
             )}
           </div>
-        </div>
-      </CardContent>
-    </Card>
-  );
+                </div>
+            </CardContent>
+        </Card>
+    );
 }

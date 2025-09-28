@@ -1,6 +1,6 @@
 'use client';
 
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider } from "@/components/ui/sidebar";
+import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarInset, SidebarMenu, SidebarMenuButton, SidebarMenuItem, SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BarChart3, Handshake, Landmark, LayoutDashboard, Phone, ShieldCheck, Users, UserPlus, Users2, UserCog, FileText } from "lucide-react";
 import Link from "next/link";
@@ -126,6 +126,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
       <SidebarProvider>
         <AdminSidebar />
         <SidebarInset>
+          <div className="flex h-16 items-center gap-2 px-4">
+            <SidebarTrigger className="-ml-1" />
+          </div>
           {children}
         </SidebarInset>
       </SidebarProvider>

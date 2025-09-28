@@ -211,6 +211,17 @@ export default function AdminTransparencyReportsPage() {
     }
   };
 
+  // Helper function to remove undefined values from objects
+  const removeUndefinedValues = (obj: any) => {
+    const cleaned: any = {};
+    for (const [key, value] of Object.entries(obj)) {
+      if (value !== undefined) {
+        cleaned[key] = value;
+      }
+    }
+    return cleaned;
+  };
+
   const handleSubmitReport = async (data: TransparencyReportForm) => {
     try {
       setIsSubmitting(true);
@@ -244,28 +255,32 @@ export default function AdminTransparencyReportsPage() {
       
       if (isEditing && editingReport) {
         // Update existing report
-        await updateTransparencyReport(editingReport.id, {
+        const updateData = removeUndefinedValues({
           title: data.title,
           message: data.message,
-          claimId: data.claimId || undefined,
+          claimId: data.claimId || null,
           expenses: currentExpenses,
           totalExpenses,
           billImageUrls: billImageUrls.length > 0 ? billImageUrls : editingReport.billImageUrls,
           wordDocumentUrl: wordDocumentUrl || editingReport.wordDocumentUrl,
         });
+        
+        await updateTransparencyReport(editingReport.id, updateData);
         console.log('Transparency report updated:', editingReport.id);
       } else {
         // Create new report
-        const reportId = await createTransparencyReport({
+        const createData = removeUndefinedValues({
           title: data.title,
           message: data.message,
-          claimId: data.claimId || undefined,
+          claimId: data.claimId || null,
           expenses: currentExpenses,
           totalExpenses,
           billImageUrls,
-          wordDocumentUrl,
+          wordDocumentUrl: wordDocumentUrl || null,
           createdBy: 'Admin' // TODO: Get from auth context
         });
+        
+        const reportId = await createTransparencyReport(createData);
         console.log('Transparency report created with ID:', reportId);
       }
       
@@ -761,7 +776,7 @@ export default function AdminTransparencyReportsPage() {
                           onClick={() => window.open(selectedReport.wordDocumentUrl, '_blank')}
                           className="ml-auto"
                         >
-                          <Download className="h-4 w-4 mr-2" />
+                          <Upload className="h-4 w-4 mr-2" />
                           Download
                         </Button>
                       </div>

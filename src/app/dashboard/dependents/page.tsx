@@ -173,7 +173,7 @@ export default function UserDependentsPage() {
                         placeholder="Spouse, Son, Daughter..." 
                         required
                       />
-                    </div>
+                  </div>
                 </div>
                 <DialogFooter>
                     <Button type="submit" disabled={addingDependent}>
@@ -197,23 +197,23 @@ export default function UserDependentsPage() {
                 <Loader2 className="h-6 w-6 animate-spin" />
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Dependent ID</TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Relationship</TableHead>
-                    <TableHead>Date Added</TableHead>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Dependent ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Relationship</TableHead>
+                  <TableHead>Date Added</TableHead>
                     <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                   {dependents.length > 0 ? (
                     dependents.map((dep) => (
-                      <TableRow key={dep.id}>
-                        <TableCell className="font-medium">{dep.id}</TableCell>
-                        <TableCell>{dep.name}</TableCell>
-                        <TableCell>{dep.relationship}</TableCell>
+                    <TableRow key={dep.id}>
+                      <TableCell className="font-medium">{dep.id}</TableCell>
+                      <TableCell>{dep.name}</TableCell>
+                      <TableCell>{dep.relationship}</TableCell>
                         <TableCell>{formatDate(dep.addedDate)}</TableCell>
                         <TableCell>
                           <Button
@@ -229,17 +229,17 @@ export default function UserDependentsPage() {
                             )}
                           </Button>
                         </TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="text-center h-24">
-                        You have not added any dependents.
-                      </TableCell>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
+                  ))
+                ) : (
+                  <TableRow>
+                      <TableCell colSpan={5} className="text-center h-24">
+                      You have not added any dependents.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
             )}
           </CardContent>
         </Card>

@@ -130,7 +130,7 @@ export default function EmergencyContactsPage() {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="flex-1 space-y-4 p-4 md:space-y-8 md:p-8">
       <div className="space-y-2">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Emergency Contacts</h1>
         <p className="text-sm sm:text-base text-muted-foreground">
@@ -165,7 +165,7 @@ export default function EmergencyContactsPage() {
               <span className="sm:hidden">Add Contact</span>
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-md mx-4 sm:mx-0">
+          <DialogContent className="max-w-md mx-4 sm:mx-0 max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>
                 {editingContact ? 'Edit Emergency Contact' : 'Add Emergency Contact'}
@@ -271,7 +271,7 @@ export default function EmergencyContactsPage() {
       </div>
 
       {/* Emergency Contacts List */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
         {emergencyContacts.length === 0 ? (
           <Card className="md:col-span-2 lg:col-span-3">
             <CardContent className="flex flex-col items-center justify-center py-12">

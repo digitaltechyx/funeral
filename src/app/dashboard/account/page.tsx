@@ -38,6 +38,39 @@ export default function AccountPage() {
     phone: userProfile?.phone || '',
   });
 
+  // Helper function to safely format dates
+  const formatDate = (date: any): string => {
+    try {
+      console.log('Formatting date:', date, 'Type:', typeof date);
+      
+      if (!date) return 'N/A';
+      
+      let dateObj: Date;
+      if (date instanceof Date) {
+        dateObj = date;
+      } else if (typeof date === 'string') {
+        dateObj = new Date(date);
+      } else if (date && typeof date.toDate === 'function') {
+        // Firebase Timestamp
+        dateObj = date.toDate();
+      } else {
+        dateObj = new Date(date);
+      }
+      
+      if (isNaN(dateObj.getTime())) {
+        console.log('Invalid date object:', dateObj);
+        return 'N/A';
+      }
+      
+      const formatted = dateObj.toLocaleDateString();
+      console.log('Formatted date:', formatted);
+      return formatted;
+    } catch (error) {
+      console.error('Error formatting date:', error, date);
+      return 'N/A';
+    }
+  };
+
   const handleSave = async () => {
     setIsLoading(true);
     try {
@@ -163,7 +196,7 @@ export default function AccountPage() {
                     <div className="flex items-center gap-2 p-3 border rounded-md bg-muted">
                       <Calendar className="h-4 w-4 text-muted-foreground" />
                       <span className="text-sm">
-                        {userProfile?.joinDate ? new Date(userProfile.joinDate).toLocaleDateString() : 'N/A'}
+                        {formatDate(userProfile?.joinDate)}
                       </span>
                     </div>
                   </div>
