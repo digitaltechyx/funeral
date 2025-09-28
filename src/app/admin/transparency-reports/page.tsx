@@ -224,20 +224,26 @@ export default function AdminTransparencyReportsPage() {
 
   const handleSubmitReport = async (data: TransparencyReportForm) => {
     try {
+      console.log('Starting report submission...', data);
       setIsSubmitting(true);
       
       const totalExpenses = currentExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+      console.log('Total expenses:', totalExpenses);
+      console.log('Current expenses:', currentExpenses);
       
       // Upload bill images if any
       let billImageUrls: string[] = [];
       if (selectedFiles.length > 0) {
+        console.log('Uploading bill images...', selectedFiles.length);
         const reportId = Date.now().toString(); // Temporary ID for file upload
         billImageUrls = await uploadBillImages(selectedFiles, reportId);
+        console.log('Bill images uploaded:', billImageUrls);
       }
       
       // Upload Word document if any
       let wordDocumentUrl: string | undefined;
       if (wordDocument) {
+        console.log('Uploading Word document...');
         setIsUploadingWord(true);
         const reportId = Date.now().toString(); // Temporary ID for file upload
         const uploadResult = await uploadWordDocument(wordDocument, reportId);
@@ -255,6 +261,7 @@ export default function AdminTransparencyReportsPage() {
       
       if (isEditing && editingReport) {
         // Update existing report
+        console.log('Updating existing report...', editingReport.id);
         const updateData = removeUndefinedValues({
           title: data.title,
           message: data.message,
@@ -269,6 +276,7 @@ export default function AdminTransparencyReportsPage() {
         console.log('Transparency report updated:', editingReport.id);
       } else {
         // Create new report
+        console.log('Creating new report...');
         const createData = removeUndefinedValues({
           title: data.title,
           message: data.message,
@@ -280,18 +288,22 @@ export default function AdminTransparencyReportsPage() {
           createdBy: 'Admin' // TODO: Get from auth context
         });
         
+        console.log('Create data:', createData);
         const reportId = await createTransparencyReport(createData);
         console.log('Transparency report created with ID:', reportId);
       }
       
       // Reload reports to show the changes
+      console.log('Reloading reports...');
       await loadReports();
       
       // Reset form and close dialog
       resetForm();
       setDialogOpen(false);
+      console.log('Report submission completed successfully');
     } catch (error) {
       console.error('Error saving transparency report:', error);
+      alert('Failed to save transparency report. Please try again.');
     } finally {
       setIsSubmitting(false);
       setIsUploadingWord(false);
@@ -350,7 +362,11 @@ export default function AdminTransparencyReportsPage() {
           </div>
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button onClick={() => {
+                console.log('Create Report button clicked');
+                console.log('Dialog open state:', dialogOpen);
+                setDialogOpen(true);
+              }}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create Report
               </Button>
@@ -363,7 +379,11 @@ export default function AdminTransparencyReportsPage() {
                 </DialogDescription>
               </DialogHeader>
               
-              <form onSubmit={reportForm.handleSubmit(handleSubmitReport)} className="space-y-6">
+              <form onSubmit={reportForm.handleSubmit((data) => {
+                console.log('Form submitted with data:', data);
+                console.log('Form errors:', reportForm.formState.errors);
+                handleSubmitReport(data);
+              })} className="space-y-6">
                 {/* Basic Info */}
                 <div className="grid gap-4">
                   <div>

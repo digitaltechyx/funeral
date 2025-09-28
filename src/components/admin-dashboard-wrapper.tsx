@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SidebarTrigger } from '@/components/ui/sidebar';
 import { UserNav } from '@/components/app/user-nav';
 import { getAllMembers, getActiveMembers, getWalletPool, getDashboardData } from '@/lib/firestore-service';
 import { getAllClaims } from '@/lib/claim-actions';
@@ -89,7 +88,6 @@ export function AdminDashboardWrapper() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
-        <SidebarTrigger />
         <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">Admin Dashboard</h1>
         <div className="flex items-center gap-4">
           <UserNav />

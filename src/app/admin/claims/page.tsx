@@ -326,7 +326,7 @@ export default function AdminClaimsPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {formatDate(claim.submittedAt)}
+                          {formatDate(claim.submissionDate)}
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center gap-2">
@@ -438,12 +438,12 @@ export default function AdminClaimsPage() {
                 )}
 
                 {/* Death Certificate */}
-                {selectedClaim.deathCertificateUrl && (
+                {selectedClaim.deathCertificateURL && (
                   <div>
                     <h3 className="font-semibold mb-2">Death Certificate</h3>
                     <div className="border rounded-lg p-4">
                       <img 
-                        src={selectedClaim.deathCertificateUrl} 
+                        src={selectedClaim.deathCertificateURL} 
                         alt="Death Certificate"
                         className="max-w-full h-auto rounded"
                         onError={(e) => {

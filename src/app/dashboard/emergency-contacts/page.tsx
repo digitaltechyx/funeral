@@ -14,7 +14,7 @@ import { Plus, Edit, Trash2, Phone, Mail, MapPin, User } from 'lucide-react';
 import { EmergencyContact } from '@/lib/database-schema';
 
 export default function EmergencyContactsPage() {
-  const { user, userProfile } = useAuth();
+  const { user, userProfile, refreshUserProfile } = useAuth();
   const [emergencyContacts, setEmergencyContacts] = useState<EmergencyContact[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -29,8 +29,16 @@ export default function EmergencyContactsPage() {
   });
 
   useEffect(() => {
+    console.log('Emergency contacts useEffect triggered');
+    console.log('userProfile:', userProfile);
+    console.log('userProfile.emergencyContacts:', userProfile?.emergencyContacts);
+    
     if (userProfile?.emergencyContacts) {
       setEmergencyContacts(userProfile.emergencyContacts);
+      console.log('Set emergency contacts:', userProfile.emergencyContacts);
+    } else {
+      console.log('No emergency contacts found in userProfile');
+      setEmergencyContacts([]);
     }
     setLoading(false);
   }, [userProfile]);
@@ -41,6 +49,9 @@ export default function EmergencyContactsPage() {
     if (!user) return;
 
     try {
+      console.log('Submitting emergency contact:', formData);
+      console.log('Current emergency contacts:', emergencyContacts);
+      
       const updatedContacts = editingContact
         ? emergencyContacts.map(contact => 
             contact.id === editingContact.id 
@@ -48,6 +59,8 @@ export default function EmergencyContactsPage() {
               : contact
           )
         : [...emergencyContacts, { ...formData, id: Date.now().toString() }];
+
+      console.log('Updated contacts to save:', updatedContacts);
 
       // Update user profile in Firestore
       const { doc, updateDoc } = await import('firebase/firestore');
@@ -57,6 +70,13 @@ export default function EmergencyContactsPage() {
         emergencyContacts: updatedContacts
       });
 
+      console.log('Emergency contacts saved to Firestore');
+
+      // Refresh user profile to get updated emergency contacts
+      await refreshUserProfile();
+      
+      console.log('User profile refreshed');
+      
       setEmergencyContacts(updatedContacts);
       setDialogOpen(false);
       setEditingContact(null);
@@ -68,6 +88,8 @@ export default function EmergencyContactsPage() {
         address: '',
         isPrimary: false
       });
+      
+      console.log('Emergency contact submission completed');
     } catch (error) {
       console.error('Error saving emergency contact:', error);
     }
@@ -99,6 +121,9 @@ export default function EmergencyContactsPage() {
         emergencyContacts: updatedContacts
       });
 
+      // Refresh user profile to get updated emergency contacts
+      await refreshUserProfile();
+      
       setEmergencyContacts(updatedContacts);
     } catch (error) {
       console.error('Error deleting emergency contact:', error);

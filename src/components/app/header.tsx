@@ -1,7 +1,6 @@
 'use client';
 
 import { UserNav } from "@/components/app/user-nav";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
 
 type HeaderProps = {
@@ -14,9 +13,6 @@ export function Header({ title, children }: HeaderProps) {
   
   return (
     <header className="sticky top-0 z-10 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
-       <div className="flex items-center gap-2">
-         <SidebarTrigger />
-       </div>
       <h1 className="flex-1 text-xl font-semibold tracking-tight font-headline">{title}</h1>
       <div className="flex items-center gap-4">
         {children}
