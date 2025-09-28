@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, CreditCard, Users, DollarSign, AlertCircle, CheckCircle, XCircle, Zap } from 'lucide-react';
+import { Loader2, CreditCard, Users, DollarSign, AlertCircle, CheckCircle, XCircle } from 'lucide-react';
 import Link from 'next/link';
 import { getAllMembers, getActiveMembers, getUserDependents } from '@/lib/firestore-service';
 import { chargeSelectedMembers } from '@/lib/payment-actions';
@@ -238,27 +238,6 @@ export default function AdminPaymentsPage() {
             </CardContent>
           </Card>
         </div>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Zap className="h-5 w-5" />
-              Quick Actions
-            </CardTitle>
-            <CardDescription>
-              Charge all active members for funeral contributions
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Button asChild size="lg">
-              <Link href="/admin/payments/charge">
-                <Zap className="mr-2 h-4 w-4" />
-                Charge All Active Members
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
 
         {/* Charging Controls */}
         <Card>
